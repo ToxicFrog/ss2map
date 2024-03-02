@@ -1,11 +1,11 @@
 local vstruct = require 'vstruct'
 
-local function supports(name)
-  return name == 'MAPPARAM'
+local function supports(tag)
+  return tag == 'MAPPARAM'
 end
 
-local function load(fd, chunk)
-  vstruct.readvals('rotatehack:b4', fd, chunk)
+local function load(chunk, data)
+  vstruct.readvals('rotatehack:b4', data, chunk)
   return chunk
 end
 

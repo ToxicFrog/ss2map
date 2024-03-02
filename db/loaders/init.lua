@@ -2,16 +2,17 @@
 
 local LOADERS = {
   require 'db.loaders.mapinfo';
-  -- require 'db.loaders.brlist';
+  require 'db.loaders.brlist';
 }
 
 return function(fd, chunk)
+  local raw = fd:read(chunk.toc.size)
   for _,loader in ipairs(LOADERS) do
     if loader.supports(chunk.meta.tag) then
-      return loader.load(fd, chunk)
+      return loader.load(chunk, raw)
     end
   end
-  -- No loaders matched, so just read in the raw data buffer.
-  chunk.raw = fd:read(chunk.toc.size)
+  -- No loaders matched, so just save the raw data.
+  chunk.raw = raw
   return chunk
 end

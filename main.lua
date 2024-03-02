@@ -3,54 +3,6 @@ require 'util'
 local vstruct = require 'vstruct'
 local tagfile = require 'db.tagfile'
 
-local DarkDB = {}
-
--- a BRLIST is just a chunk header followed by a bunch of brushes packed end
--- to end until it runs out of space.
-
-DarkDB.BrushFace = vstruct.compile('BrushFace', [[
-  -- TODO: this should also be pack(2)
-  texture:i2
-  rotation:u2 -- texture rotation
-  scale:u2
-  offset:{ u2 u2 }
-]])
-
-DarkDB.Coord = vstruct.compile('Coord', 'x:f4 y:f4 z:f4')
--- Rotation is stored in "angle units". To turn angle units into radians,
--- multiply by pi/2 and divide by 2^14 (16k).
--- That means that 16k is a right angle, since 16k/16k * pi/2 = pi/2 radians.
--- a full circle is 64k, or 0xFFFF, so one of these fields is just "angle in
--- 1/64k-ths of a circle".
--- This also means that if we define it as 1.15 fixed point, it gives us a range
--- from 0.0 to 1.9..., which is the same number of pi in a circle and our
--- conversion is just "angle * pi".
-DarkDB.Rotation = vstruct.compile('IntCoord', 'x:p2,15 y:p2,15 z:p2,15')
-
-DarkDB.Brush = vstruct.compile('Brush', [[
-  -- TODO: in DarkDBDefs.h this is pack(2), which worries me -- double check!
-  id:u2
-  time:u2
-  primal:i4
-  base:i2
-  type:i1
-  x1
-  position:{ &Coord }
-  size:{ &Coord } -- radius from center; double to get LxWxH
-  rotation:{ &IntCoord } -- tx, ty, tz -- TODO: world or brush coordinates
-  cur_face:i2
-  snap_size:f4
-  x18
-  snap_grid:b1
-  num_faces:u1
-  edge:u1
-  vertex:u1
-  flags:u1 -- TODO: convert to bitfield?
-  group:u1
-  x4
-  faces:{}
-]])
-
 local function main(...)
   local mis = tagfile(...)
 
@@ -61,23 +13,6 @@ local function main(...)
 
   brlist = mis.chunks.BRLIST
   mapparam = mis.chunks.MAPPARAM
-
-  io.writefile('BRLIST', brlist.raw)
-  local cursor = vstruct.cursor(brlist.raw)
-  printf('BRLIST: v%d.%d\n', brlist.meta.major, brlist.meta.minor)
-  while cursor.pos < brlist.toc.size do
-    local pos = cursor.pos
-    vstruct.read('{ &Brush }', cursor, brlist)
-    local brush = brlist[#brlist]
-    printf('  BRUSH@%x: id=%d, type=%d\n', pos, brush.id, brush.type)
-    if brush.type >= 0 then
-      brush.faces.n = brush.num_faces
-      vstruct.read('#n * { &BrushFace }', cursor, brush.faces)
-    end
-  end
-
-  print(mapparam.rotatehack)
-
 end
 
 if love then

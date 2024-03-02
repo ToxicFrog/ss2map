@@ -15,7 +15,7 @@ function tagfile:__tostring()
   return string.format('tagfile[%s]', self.path or '(empty)')
 end
 
-local toc = vstruct.compile('TagFileIndex', [[
+local TagFileIndex = vstruct.compile('TagFileIndex', [[
   -- start of file header
   <
   offset:u4
@@ -33,7 +33,7 @@ local toc = vstruct.compile('TagFileIndex', [[
   }
 ]])
 
-local chunk_header = vstruct.compile('TagChunkHeader', [[
+local ChunkHeader = vstruct.compile('ChunkHeader', [[
   tag:z12
   major:u4
   minor:u4
@@ -43,12 +43,12 @@ local chunk_header = vstruct.compile('TagChunkHeader', [[
 function tagfile:load(path)
   local fd = assert(io.open(path, 'rb'))
   self.path = path
-  toc:read(fd, self.toc)
+  TagFileIndex:read(fd, self.toc)
   for _,entry in ipairs(self.toc) do
     fd:seek('set', entry.offset)
     local chunk = {
       toc = entry;
-      meta = chunk_header:read(fd);
+      meta = ChunkHeader:read(fd);
     }
     if entry.size > 0 then
       loadChunk(fd, chunk)
