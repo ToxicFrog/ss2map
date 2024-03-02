@@ -1,31 +1,9 @@
 #!/usr/bin/env lua
 require 'util'
 local vstruct = require 'vstruct'
+local tagfile = require 'db.tagfile'
 
 local DarkDB = {}
-
-DarkDB.toc = vstruct.compile [[
-  header:{
-    offset:u4
-    x8
-    comment:z256
-    magic:u4
-  }
-  @#header.offset
-  n:u4
-  #n * {
-    name:z12
-    offset:u4
-    size:u4
-  }
-]]
-
-DarkDB.ChunkHeader = vstruct.compile('ChunkHeader', [[
-  name:z12
-  major:u4
-  minor:u4
-  zero:u4
-]])
 
 -- a BRLIST is just a chunk header followed by a bunch of brushes packed end
 -- to end until it runs out of space.
@@ -74,21 +52,20 @@ DarkDB.Brush = vstruct.compile('Brush', [[
 ]])
 
 local function main(...)
-  local fd = assert(io.open(..., 'rb'))
-  local toc = DarkDB.toc:read(fd)
+  local mis = tagfile(...)
 
   -- chunk names appear to be globally unique within the file, which is convenient
-  for _,entry in ipairs(toc) do
-    printf('%08X %8d %s\n', entry.offset, entry.size, entry.name)
-    toc[entry.name] = entry
+  for _,entry in ipairs(mis.toc) do
+    printf('%08X %8d %s\n', entry.offset, entry.size, entry.tag)
   end
 
-  brlist = { offset = toc.BRLIST.offset; size = toc.BRLIST.size; }
-  vstruct.read('@#offset header:{ &ChunkHeader } data:s#size', fd, brlist)
-  io.writefile('BRLIST', brlist.data)
-  local cursor = vstruct.cursor(brlist.data)
-  printf('BRLIST: v%d.%d\n', brlist.header.major, brlist.header.minor)
-  while cursor.pos < brlist.size do
+  brlist = mis.chunks.BRLIST
+  mapparam = mis.chunks.MAPPARAM
+
+  io.writefile('BRLIST', brlist.raw)
+  local cursor = vstruct.cursor(brlist.raw)
+  printf('BRLIST: v%d.%d\n', brlist.meta.major, brlist.meta.minor)
+  while cursor.pos < brlist.toc.size do
     local pos = cursor.pos
     vstruct.read('{ &Brush }', cursor, brlist)
     local brush = brlist[#brlist]
@@ -99,11 +76,8 @@ local function main(...)
     end
   end
 
-  mapparam = { offset = toc.MAPPARAM.offset; size = toc.MAPPARAM.size; }
-  vstruct.read('@#offset header:{ &ChunkHeader } rotatehack:b4', fd, mapparam)
   print(mapparam.rotatehack)
 
-  fd:close()
 end
 
 if love then
