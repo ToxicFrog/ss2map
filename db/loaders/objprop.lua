@@ -25,7 +25,7 @@ local function supports(tag)
   return tag:match('^P%$')
 end
 
-local function load(chunk, data)
+local function load(self, chunk, data)
   -- TODO: read the proplist.txt, select the full property name, and deserialize
   -- the property data.
   chunk.prop_name = chunk.meta.tag:sub(3,-1)

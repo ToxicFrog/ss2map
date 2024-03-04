@@ -51,7 +51,7 @@ function tagfile:load(path)
       meta = ChunkHeader:read(fd);
     }
     if entry.size > 0 then
-      loadChunk(fd, chunk)
+      loadChunk(self, fd, chunk)
     end
     self.chunks[chunk.meta.tag] = chunk
     if chunk.prop_name then

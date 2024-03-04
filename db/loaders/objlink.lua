@@ -20,10 +20,10 @@ local function supports(tag)
   return tag:match('^L%$')
 end
 
-local function load(chunk, data)
+local function load(self, chunk, data)
   -- TODO: read the proplist.txt to get the full link name.
   chunk.link_name = chunk.meta.tag:sub(3,-1)
-  chunk.links = {}
+  chunk.links = {} -- per-chunk, gives us link type -> src -> dst
   for prop in ObjLink:records(data) do
     chunk.links[prop.src] = prop.dst
   end

@@ -7,11 +7,11 @@ local LOADERS = {
   require 'db.loaders.objlink';
 }
 
-return function(fd, chunk)
+return function(self, fd, chunk)
   local raw = fd:read(chunk.toc.size)
   for _,loader in ipairs(LOADERS) do
     if loader.supports(chunk.meta.tag) then
-      return loader.load(chunk, raw)
+      return loader.load(self, chunk, raw)
     end
   end
   -- No loaders matched, so just save the raw data.

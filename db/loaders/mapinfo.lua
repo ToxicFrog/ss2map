@@ -4,7 +4,7 @@ local function supports(tag)
   return tag == 'MAPPARAM'
 end
 
-local function load(chunk, data)
+local function load(self, chunk, data)
   vstruct.readvals('rotatehack:b4', data, chunk)
   return chunk
 end

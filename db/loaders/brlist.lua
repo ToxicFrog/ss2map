@@ -106,11 +106,14 @@ end
 -- TODO: additional postprocessing; stringify brush types and shapes, add
 -- convenience functions for rendering, intersection detection, etc. We might
 -- want to pull these out into separate files for different kinds of brush.
-local function load(chunk, data)
+local function load(self, chunk, data)
+  chunk.by_type = {}
   local cursor = vstruct.cursor(data)
   while cursor.pos < chunk.toc.size do
     vstruct.read('{ &Brush }', cursor, chunk)
     local brush = chunk[#chunk]
+    chunk.by_type[brush.type] = chunk.by_type[brush.type] or {}
+    chunk.by_type[brush.type][brush.id] = brush
     if brush.type >= 0 then
       -- Only terrain-type brushes use nrof_faces for the actual number of faces
       brush.faces.n = brush.nrof_faces
