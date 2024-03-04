@@ -4,6 +4,7 @@ local LOADERS = {
   require 'db.loaders.mapinfo';
   require 'db.loaders.brlist';
   require 'db.loaders.objprop';
+  require 'db.loaders.objlink';
 }
 
 return function(fd, chunk)

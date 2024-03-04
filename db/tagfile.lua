@@ -59,6 +59,11 @@ function tagfile:load(path)
         self.props[id] = self.props[id] or {}
         self.props[id][chunk.prop_name] = value
       end
+    elseif chunk.link_name then
+      for src,dst in pairs(chunk.links) do
+        self.links[src] = self.links[src] or {}
+        self.links[src][chunk.link_name] = dst
+      end
     end
   end
 end
@@ -68,6 +73,7 @@ return function(path)
     toc = {};    -- linear list of TOC entries
     chunks = {}; -- tag to chunk data structure map
     props = {};  -- object ID to property name to property value map
+    links = {}; -- object ID to link name to target object map
   }
   setmetatable(self, tagfile)
   self:load(path)
