@@ -39,15 +39,13 @@ local Rotation = vstruct.compile('Rotation', [[ x:p2,15 y:p2,15 z:p2,15 ]])
 local Brush = vstruct.compile('Brush', [[
   id:u2
   time:u2
-  -- stored as "primal" in LGS
   shape:{
     -- family is 1 for cylinders, 2 for pyramids, 3 for corner pyramids, and 0 for everything else
     -- index is number of extra faces if family!=0, otherwise denotes shape:
     -- 1=cube, 6=dodecahedron, 7=wedge
     [2| family:u7 face_aligned:b1 index:u8 ]
   }
-  x2
-  --primal:i4 -- this contains the shape for terrain, and the oid for rooms and objects
+  -2 primal:i4
   base:i2 -- base archetype id for objects?
   type:i1 -- brush type, e.g. solid, air
   x1
