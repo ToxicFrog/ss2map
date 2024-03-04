@@ -3,6 +3,11 @@
 --
 -- A property chunk just consists of a generic chunk header followed by zero
 -- or more ObjProp entries, one for each object with that property.
+--
+-- Note that objprops stored in MIS files only store those that differ from the
+-- default properties in the gamesys. In order to look those up, we also need
+-- to process the MetaProp link chunk (L$MetaProp); the destination of each link
+-- is going to be the parent object ID.
 local vstruct = require 'vstruct'
 
 -- A single entry that links a property value to an object ID. The property
