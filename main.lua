@@ -3,12 +3,23 @@ require 'util'
 local vstruct = require 'vstruct'
 local tagfile = require 'db.tagfile'
 
+local function hexdump(s)
+  return s:gsub('.', function(c) return string.format('%02X', c:byte()) end)
+end
+
 local function main(...)
   local mis = tagfile(...)
 
   -- chunk names appear to be globally unique within the file, which is convenient
   for _,entry in ipairs(mis.toc) do
     printf('%08X %8d %s\n', entry.offset, entry.size, entry.tag)
+  end
+
+  for id,props in pairs(mis.props) do
+    print('OBJPROP', id)
+    for k,v in pairs(props) do
+      print('', k, hexdump(v))
+    end
   end
 
   return mis

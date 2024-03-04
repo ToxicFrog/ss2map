@@ -54,13 +54,20 @@ function tagfile:load(path)
       loadChunk(fd, chunk)
     end
     self.chunks[chunk.meta.tag] = chunk
+    if chunk.prop_name then
+      for id,value in pairs(chunk.props) do
+        self.props[id] = self.props[id] or {}
+        self.props[id][chunk.prop_name] = value
+      end
+    end
   end
 end
 
 return function(path)
   local self = {
-    toc = {};
-    chunks = {};
+    toc = {};    -- linear list of TOC entries
+    chunks = {}; -- tag to chunk data structure map
+    props = {};  -- object ID to property name to property value map
   }
   setmetatable(self, tagfile)
   self:load(path)

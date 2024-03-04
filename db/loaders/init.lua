@@ -3,6 +3,7 @@
 local LOADERS = {
   require 'db.loaders.mapinfo';
   require 'db.loaders.brlist';
+  require 'db.loaders.objprop';
 }
 
 return function(fd, chunk)
