@@ -18,16 +18,12 @@ local Coord = vstruct.compile('Coord', [[ x:f4 y:f4 z:f4 ]])
 -- Rotation. These are all in Dark engine "angle units", 1/64k-ths of a circle.
 -- We read them as 1.15 fixed point values, which gives a range of [0,2), which
 -- means we can convert them into radians just by multiplying by pi.
+-- I suspect that the way these are actually applied is:
+-- - heading (z) first, rotating the object's x and y axes in the process; this
+--   gives you "faces-towards"
+-- - then pitch (not sure if x or y here); this gives you "points-at"
+-- - then rotate around the object's remaining axis for bank
 local Rotation = vstruct.compile('Rotation', [[ x:p2,15 y:p2,15 z:p2,15 ]])
-do
-  -- Wrap the reader to convert to radians at read time.
-  local _read = Rotation.read
-  function Rotation.read(...)
-    local rot = _read(...)
-    rot.x,rot.y,rot.z = rot.x*math.pi, rot.y*math.pi, rot.z*math.pi
-    return rot
-  end
-end
 
 -- An actual brush definition. Some of these fields are really hairy and
 -- require additional postprocessing that we don't do yet.
@@ -43,7 +39,15 @@ end
 local Brush = vstruct.compile('Brush', [[
   id:u2
   time:u2
-  primal:i4 -- this contains the shape for terrain, and the oid for rooms and objects
+  -- stored as "primal" in LGS
+  shape:{
+    -- family is 1 for cylinders, 2 for pyramids, 3 for corner pyramids, and 0 for everything else
+    -- index is number of extra faces if family!=0, otherwise denotes shape:
+    -- 1=cube, 6=dodecahedron, 7=wedge
+    [2| family:u7 face_aligned:b1 index:u8 ]
+  }
+  x2
+  --primal:i4 -- this contains the shape for terrain, and the oid for rooms and objects
   base:i2 -- base archetype id for objects?
   type:i1 -- brush type, e.g. solid, air
   x1
@@ -62,6 +66,40 @@ local Brush = vstruct.compile('Brush', [[
   x4
   faces:{}
 ]])
+
+-- Notes on brush types
+-- 0 (solid) and 1 (air) are easy. Solid takes precedence.
+-- 2 (water) takes precedence over both solid and air.
+-- 3 (air2water), 4 (water2air), 5 (solid2water), 6 (solid2air), 7 (air2solid),
+-- and 8 (water2solid) all turn the first brush type into the second within
+-- their volume, while leaving other brushes alone. In particular 3 is usually
+-- used for flooded regions -- you make the solid geometry first then slap an
+-- air2water brush over it.
+-- 9 (blockable) is weird, complicated, and sometimes created automatically
+-- by the editor; we can probably ignore it.
+-- On to the non-terrain types.
+-- -5 (room) defines room boundaries. -4 (flow) defines liquid flow.
+-- -3 defines the position and orientation of an object; the actual object
+-- info needs to be looked up in the property chunks.
+-- -2 (area) splits the map into distinct areas. This is purely an editor convenience.
+-- -1 defines lighting.
+-- Of these, objects and rooms are the most interesting. Rooms, in particular,
+-- define the borders of a space for both sound propagation and automap purposes
+-- and thus may be more useful than air brushes for some things! They can even
+-- be named, although it's unclear if LGS used this feature in SS2.
+
+-- Notes on brush shapes
+-- DarkDB has some weird code around this, but some known shapes are:
+-- 0x0001 (cuboid)
+-- 0x0006 (dodecahedron)
+-- 0x0007 (wedge)
+-- 0x0200 (cylinder)
+-- 0x0400 (pyramid)
+-- 0x0600 (corner pyramid -- peak is over one of the corners rather than centered)
+-- in the latter three cases the low byte indicates the number of *extra* faces
+-- beyond the minimum needed for this shape, so 0 means 5 faces for a cylinder
+-- (3 side faces + top and bottom) or 4 for a pyramid (3 side faces + bottom).
+
 
 local function supports(tag)
   return tag == 'BRLIST'
