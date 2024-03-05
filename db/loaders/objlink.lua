@@ -23,9 +23,12 @@ end
 local function load(self, chunk, data)
   -- TODO: read the proplist.txt to get the full link name.
   chunk.link_name = chunk.meta.tag:sub(3,-1)
-  chunk.links = {} -- per-chunk, gives us link type -> src -> dst
-  for prop in ObjLink:records(data) do
-    chunk.links[prop.src] = prop.dst
+  chunk.links = {}
+  for link in ObjLink:records(data) do
+    -- per-chunk maps gives us link type -> src -> dst
+    chunk.links[link.src] = link.dst
+    -- also update the per-file src -> type -> dst map
+    self:addLink(link.src, chunk.link_name, link.dst)
   end
   return chunk
 end

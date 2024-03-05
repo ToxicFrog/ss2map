@@ -31,7 +31,10 @@ local function load(self, chunk, data)
   chunk.prop_name = chunk.meta.tag:sub(3,-1)
   chunk.props = {}
   for prop in ObjProp:records(data) do
+    -- per-chunk maps for property -> id -> value
     chunk.props[prop.id] = prop.value
+    -- also update the per-file id -> property -> value map
+    self:addProp(prop.id, chunk.prop_name, prop.value)
   end
   return chunk
 end

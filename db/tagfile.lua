@@ -54,22 +54,110 @@ function tagfile:load(path)
       loadChunk(self, fd, chunk)
     end
     self.chunks[chunk.meta.tag] = chunk
-    if chunk.prop_name then
-      for id,value in pairs(chunk.props) do
-        self.props[id] = self.props[id] or {}
-        self.props[id][chunk.prop_name] = value
-      end
-    elseif chunk.link_name then
-      for src,dst in pairs(chunk.links) do
-        self.links[src] = self.links[src] or {}
-        self.links[src][chunk.link_name] = dst
-      end
-    end
   end
 end
 
-return function(path)
+function tagfile:addLink(src, type, dst)
+  self.links[src] = self.links[src] or {}
+  self.links[src][type] = dst
+end
+
+function tagfile:derefLink(src, type)
+  local links = self.links[src]
+  if links and links[type] then return links[type] end
+  if self.parent then return self.parent:derefLink(src, type) end
+end
+
+function tagfile:addProp(id, prop, value)
+  self.props[id] = self.props[id] or {}
+  self.props[id][prop] = value
+end
+
+-- Get a named property. If include_metaprops is set, also searches the object's
+-- MetaProp link to get the default value.
+function tagfile:getProp(id, name, include_metaprops)
+  local props = self.props[id]
+  local val = props and props[name]
+  if val ~= nil then return val end
+  val = self.parent and self.parent:getProp(id, name, include_metaprops)
+  if val ~= nil then return val end
+  if include_metaprops then
+    local base = self:derefLink(id, 'MetaProp')
+    if base then return self:getProp(base, name, true) end
+  end
+  return nil
+end
+
+-- Return a table containing all of the properties of the given object.
+function tagfile:getPropTable(id, include_metaprops)
+  local props = {}
+  for k,v in self:props(id, include_metaprops) do
+    props[k] = v
+  end
+  return props
+end
+
+-- Returns an iterator over all properties for the object.
+-- For each property, yields name, value, inherited; the latter is true if the
+-- property was inherited from the metaprops.
+function tagfile:propPairs(id, include_metaprops)
+  local seen = {}
+  return coroutine.wrap(function()
+    for k,v in pairs(self.props[id] or {}) do
+      seen[k] = true
+      coroutine.yield(k, v, false)
+    end
+    if self.parent then
+      for k,v,inherited in self.parent:propPairs(id, include_metaprops) do
+        if not seen[k] then
+          seen[k] = true
+          coroutine.yield(k, v, inherited)
+        end
+      end
+    end
+    local base = self:derefLink(id, 'MetaProp')
+    if not base or not include_metaprops then return end
+    for k,v in self:propPairs(base, true) do
+      if not seen[k] then
+        seen[k] = true
+        coroutine.yield(k, v, true)
+      end
+  end
+  end)
+end
+
+-- Return the MetaProp table for a given object by looking up its metaprop link.
+function tagfile:getMetaProps(id)
+  local links = self.links[id]
+  if links and links.MetaProp then
+    return self:getProps(links.MetaProp)
+  end
+end
+
+-- Get a table containing all of the properties on an object.
+-- We eagerly merge the properties so that callers can use ipairs and stuff.
+function tagfile:getProps(id)
+  -- Do we even know about this object? If not, delegate to the parent if we have one.
+  local props = self.props[id]
+  if not props then
+    return self.parent and self.parent:getProps(id)
+  end
+
+  -- Initially populate with the MetaProps.
+  local obj = {}
+  local mp = self:getMetaProps(id)
+  for k,v in pairs(mp or {}) do
+    props[k] = v
+  end
+  for k,v in pairs(props) do
+    obj[k] = v
+  end
+  return obj
+end
+
+return function(path, parent)
   local self = {
+    parent = parent; -- parent tagfile to look up properties/links in
     toc = {};    -- linear list of TOC entries
     chunks = {}; -- tag to chunk data structure map
     props = {};  -- object ID to property name to property value map
