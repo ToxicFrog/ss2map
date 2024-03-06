@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#
+# Wrapper script for the interactive map viewer.
+
+SRCDIR="$(dirname "$0")"
+
+if type love >/dev/null 2>/dev/null; then
+  exec love "$SRCDIR" "$@"
+else
+  echo "Couldn't find 'love' command, please make sure love2d is installed"
+  exit 1
+fi
