@@ -9,6 +9,7 @@
 -- to process the MetaProp link chunk (L$MetaProp); the destination of each link
 -- is going to be the parent object ID.
 local vstruct = require 'vstruct'
+local proplist = require 'db.proplist'
 
 -- A single entry that links a property value to an object ID. The property
 -- name is determined by the containing field. Aggravatingly, there's no type
@@ -31,6 +32,7 @@ local function load(self, chunk, data)
   chunk.prop_name = chunk.meta.tag:sub(3,-1)
   chunk.props = {}
   for prop in ObjProp:records(data) do
+    prop.value = proplist.read(chunk.prop_name, prop.value)
     -- per-chunk maps for property -> id -> value
     chunk.props[prop.id] = prop.value
     -- also update the per-file id -> property -> value map
