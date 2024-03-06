@@ -36,14 +36,15 @@ flags.register('inherited') {
   help = 'when listing object properties, include inherited properties';
 }
 
-local function listobjs(mis, props, inherited)
+local function listobjs(mis, props, include_metaprops)
   for id,brush in pairs(mis.chunks.BRLIST.by_type[-3]) do
     local pos = brush.position
     local name = mis:getProp(brush.primal, 'SymName', true)
-    printf('[%08x] %s @ (%f,%f,%f)\n',
-        brush.primal, name, pos.x, pos.y, pos.z)
+    local basename = mis:getProp(mis:derefLink(brush.primal, 'MetaProp'), 'SymName')
+    printf('[%08x] %s @ (%.2f,%.2f,%.2f)%s\n',
+        brush.primal, name, pos.x, pos.y, pos.z, basename and ' -- '..basename or '')
     if props then
-      for k,v,inherited in mis:propPairs(brush.primal, inherited) do
+      for k,v,inherited in mis:propPairs(brush.primal, include_metaprops) do
         printf('  %s %-16s %s\n', inherited and '+' or ' ', k..':', v)
       end
     end
