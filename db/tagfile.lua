@@ -98,20 +98,21 @@ function tagfile:getPropTable(id, include_metaprops)
 end
 
 -- Returns an iterator over all properties for the object.
--- For each property, yields name, value, inherited; the latter is true if the
--- property was inherited from the metaprops.
+-- For each property, yields name, value, source; the latter is the object ID
+-- of the object the property is inherited from, and nil if the property is not
+-- inherited.
 function tagfile:propPairs(id, include_metaprops)
   local seen = {}
   return coroutine.wrap(function()
     for k,v in pairs(self.props[id] or {}) do
       seen[k] = true
-      coroutine.yield(k, v, false)
+      coroutine.yield(k, v, nil)
     end
     if self.parent then
-      for k,v,inherited in self.parent:propPairs(id, include_metaprops) do
+      for k,v,base in self.parent:propPairs(id, include_metaprops) do
         if not seen[k] then
           seen[k] = true
-          coroutine.yield(k, v, inherited)
+          coroutine.yield(k, v, base)
         end
       end
     end
@@ -120,7 +121,7 @@ function tagfile:propPairs(id, include_metaprops)
     for k,v in self:propPairs(base, true) do
       if not seen[k] then
         seen[k] = true
-        coroutine.yield(k, v, true)
+        coroutine.yield(k, v, base)
       end
   end
   end)
@@ -157,6 +158,7 @@ end
 
 return function(path, parent)
   local self = {
+    path = path;
     parent = parent; -- parent tagfile to look up properties/links in
     toc = {};    -- linear list of TOC entries
     chunks = {}; -- tag to chunk data structure map

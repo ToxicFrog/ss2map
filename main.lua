@@ -18,6 +18,10 @@ flags.register('proplist') {
   type = flags.string;
 }
 
+flags.register('mapgen') {
+  help = 'generate www/map.html and immediately exit';
+}
+
 local function main(...)
   local args = flags.parse {...}
   if args.help or #args < 1 then
@@ -27,15 +31,34 @@ local function main(...)
   end
 
   if args.proplist then
+    print('PROPS', args.proplist)
     proplist.load(args.proplist)
   else
     print('WARNING: no --proplist specified, entity property data will be unavailable')
   end
 
-  local gam; if args.gamesys then gam = tagfile(args.gamesys) end
-  local mis = tagfile(args[1], gam)
+  if args.mapgen then
+    require 'mapgen'
+  end
 
-  return mis
+  local gam
+  if args.gamesys then
+    print('GAMESYS', args.gamesys)
+    gam = tagfile(args.gamesys)
+  end
+
+  local maps = {}
+  for i,mis in ipairs(args) do
+    print('MAP', mis)
+    maps[i] = tagfile(mis, gam)
+  end
+
+  if args.mapgen then
+    require 'mapgen' (maps)
+    os.exit(0)
+  end
+
+  return maps[1]
 end
 
 if love then
