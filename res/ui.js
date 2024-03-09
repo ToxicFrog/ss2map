@@ -70,11 +70,13 @@ function initMap() {
   if (map.stage)
     return;
 
-  var mapdiv = document.getElementById('map');
+  var container = document.getElementById('mapcell');
+  console.log(container);
+  console.log(container.getBoundingClientRect());
   map.stage = new Kinetic.Stage({
     container: 'map',
-    width: mapdiv.width,
-    height: mapdiv.width
+    width: container.getBoundingClientRect().width,
+    height: container.getBoundingClientRect().height
   })
   // map.stage.setOffset({x: map.stage.width/2, y: map.stage.height/2});
   // console.log(map.stage.width(), map.stage.height());
