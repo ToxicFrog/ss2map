@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <title>System Shock 2 Map Viewer</title>
     <style>
-      body {
-        margin: 0px;
-        padding: 0px;
+      html, body {
+        margin: 0;
+        border: 0;
+        padding: 0;
         height: 100vh;
+        overflow: hidden;
       }
       .search-result {
         cursor: pointer;
@@ -31,6 +33,9 @@
         height: 100%;
         width: 50%;
       }
+      table.toplevel {
+        margin: 0; border: 0; padding: 0;
+      }
     </style>
     <script>
       var DEFAULT = ${DEFAULT_LEVEL}
@@ -43,7 +48,7 @@
     <script src="./init.js"></script>
   </head>
   <body bgcolor="#202020" text="#B0B0B0">
-    <table width="100%" height="100%" style="table-layout: fixed">
+    <table width="100%" height="100%" style="table-layout: fixed" class="toplevel">
       <tr>
         <td width="25%" valign="top"><!-- Left sidebar -->
 
@@ -94,6 +99,7 @@
             <button type="button" onclick="performSearch(true);">Search All</button>
           </form>
           <hr>
+          <!-- TODO: this should be scrollable independent of the rest of the page -->
           <table id="search-results">
             <tr>
               <th>Lv</th>

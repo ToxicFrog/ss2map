@@ -78,14 +78,6 @@ function initMap() {
     width: container.getBoundingClientRect().width,
     height: container.getBoundingClientRect().height
   })
-  // map.stage.setOffset({x: map.stage.width/2, y: map.stage.height/2});
-  // console.log(map.stage.width(), map.stage.height());
-  let scale = 1.4;
-  let x = 0, y = 0;
-  map.stage.setOffset({x: -(map.stage.width()/2 + x)/scale, y: -(map.stage.height()/2 + y)/scale});
-  map.stage.setScale({x: scale, y: scale});
-  // TODO: set rotation if map has the compass hack flag set
-  // map.stage.setRotation(30);
 
   map.mapLayer = new Kinetic.FastLayer({ x: 0, y: 0, width: map.width }); // level geometry
   map.hitLayer = new Kinetic.Layer({ x: 0, y: 0, width: map.width, opacity: 0 });  // mouse event trap
@@ -120,6 +112,12 @@ function initMap() {
     map.stage.add(map.objLayers[i])
   }
   map.stage.add(map.searchLayer)
+
+  if (!map.scale) {
+    map.scale = 1.4;
+    map.pan = { x: 0, y: 0 };
+  }
+  applyPanAndZoom(map);
 }
 
 function drawSearchResults() {

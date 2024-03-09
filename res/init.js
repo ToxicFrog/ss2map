@@ -45,8 +45,49 @@ window.addEventListener('load', function() {
   initMap()
   // updateLayers()
   document.getElementById("levelselect").value = map.index
-  document.title = map.title + " - System Shock Map"
+  document.title = map.title + " - System Shock 2 Map"
+
+  installPanZoomHandlers(document.getElementById('mapcell'));
 }, false)
+
+// Setup event handlers for pan/zoom on the div containing the canvas.
+// We expect `map` to hold the currently viewed map, with fields `scale`
+// and `pan.x/y`.
+function installPanZoomHandlers(container) {
+  var dragging = false;
+  var dragstate = {};
+
+  container.addEventListener('mousedown', function(evt) {
+    if (evt.which != 1) return false;
+    dragging = true;
+    dragstate = {
+      startX: evt.pageX, startY: evt.pageY,
+      panX: map.pan.x, panY: map.pan.y,
+    }
+  });
+
+  container.addEventListener('mousemove', function(evt) {
+    if (!dragging) return false;
+    map.pan.x = dragstate.panX - (evt.pageX - dragstate.startX) ///map.scale;
+    map.pan.y = dragstate.panY - (evt.pageY - dragstate.startY) ///map.scale;
+    applyPanAndZoom(map);
+  });
+
+  container.addEventListener('mouseup', function(evt) {
+    dragging = false;
+    dragstate = {};
+  })
+
+  container.addEventListener('wheel', function(evt) {
+    let oldscale = map.scale;
+    map.scale = Math.max(0.2, map.scale + evt.wheelDelta * 0.0002);
+    let ratio = map.scale/oldscale;
+    map.pan.x *= ratio;
+    map.pan.y *= ratio;
+    applyPanAndZoom(map);
+    evt.preventDefault();
+  }, false);
+}
 
 // Turn objects in the form we get them from the map view generator, as lists
 // of [key,value] pairs, into normal JS objects with a _props property that

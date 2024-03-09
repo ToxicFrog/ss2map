@@ -22,7 +22,6 @@ function point(layer, x, y, colour, id) {
 }
 
 function target(layer, x, y) {
-  console.log("target", x, y, (map.width/2) + x, (map.height/2) - y)
   layer.add(new Kinetic.Star({
     x: x, y: -y,
     numPoints: 4,
@@ -34,7 +33,6 @@ function target(layer, x, y) {
 }
 
 function hilight(layer, x, y) {
-  console.log("highlight", x, y, (map.width/2) + x, (map.height/2) - y)
   var circle = new Kinetic.Circle({
     x: x, y: -y,
     radius: SCALE,
@@ -44,3 +42,11 @@ function hilight(layer, x, y) {
   return circle
 }
 
+function applyPanAndZoom(map) {
+  let stage = map.stage;
+  let w = stage.width();
+  let h = stage.height();
+  stage.setOffset({ x: (-w/2 + map.pan.x)/map.scale, y: (-h/2 + map.pan.y)/map.scale });
+  stage.setScale({ x: map.scale, y: map.scale });
+  stage.draw();
+}
