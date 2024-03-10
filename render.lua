@@ -98,7 +98,6 @@ local function init(mis)
   end
 end
 
-
 -- convert worldspace coordinates to screenspace coordinates
 local function world2screen(x, y)
   do return x,-y end
@@ -109,7 +108,7 @@ local function drawRotatedRectangle(mode, x, y, width, height, angle)
   -- can move and rotate the coordinate system.
   love.graphics.push()
   love.graphics.translate(x, y)
-  love.graphics.rotate(angle)
+  love.graphics.rotate(-angle)
   love.graphics.rectangle(mode, -width, -height, width*2, height*2)
   love.graphics.pop()
 end
