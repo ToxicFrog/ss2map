@@ -103,10 +103,10 @@ local function init(mis)
   brushSort(brushes.air)
   brushSort(brushes.walls)
 
-  print('Loaded:')
-  for k,v in pairs(brushes) do
-    print('', k, #v)
-  end
+  -- print('Loaded:')
+  -- for k,v in pairs(brushes) do
+  --   print('', k, #v)
+  -- end
 end
 
 -- convert worldspace coordinates to screenspace coordinates
@@ -119,7 +119,7 @@ local function drawRotatedRectangle(mode, x, y, width, height, angle)
   -- can move and rotate the coordinate system.
   love.graphics.push()
   love.graphics.translate(x, y)
-  love.graphics.rotate(-angle)
+  love.graphics.rotate(angle)
   love.graphics.rectangle(mode, -width, -height, width*2, height*2)
   love.graphics.pop()
 end
@@ -198,10 +198,15 @@ local function prepareCanvas()
   scale = flags.parsed.renderscale
   local x,y,w,h = getBBox()
   love.graphics.scale(scale, -scale) -- invert Y since LGS uses southwest rather than northwest gravity
-  love.graphics.translate(-x + w/20/scale, -(y+h) - h/20/scale)
-  love.graphics.setLineWidth(1/scale)
-  love.graphics.setColor(1,0,1,1)
+  love.graphics.translate(-x, -(y+h))
+  love.graphics.setColor(1,1,0,1)
+  love.graphics.setLineWidth(scale)
   love.graphics.rectangle('line', x, y, w, h)
+  love.graphics.setColor(1,1,1,1)
+  love.graphics.line(0, -100, 0, 100)
+  love.graphics.line(-100, 0, 100, 0)
+  love.graphics.circle('line', 0, 0, 50)
+  love.graphics.setLineWidth(2/scale)
 end
 
 -- Draw outer volumes of air brushes.
@@ -261,9 +266,9 @@ end
 
 local function drawObjects(brushes)
   for _,brush in ipairs(brushes) do
-    love.graphics.setColor(1, 0, 0, 0.5)
+    love.graphics.setColor(1, 1, 1, 0.5)
     local x,y = world2screen(brush.position.x, brush.position.y)
-    love.graphics.circle('fill', x, y, 0.5)
+    love.graphics.circle('fill', x, y, 1)
   end
 end
 
@@ -318,7 +323,9 @@ local function draw()
   drawAir(brushes.air)
   drawDecorations(brushes.decor)
   drawWalls(brushes.walls)
-  drawObjects(brushes.objects)
+  if not love.graphics.getCanvas() then
+    drawObjects(brushes.objects)
+  end
   -- drawUnknown(brushes.other)
   drawBadBrushes(brushes.air, brushes.walls, brushes.decor)
   love.graphics.pop()
@@ -331,8 +338,8 @@ local function drawToFile(filename)
   love.graphics.clear()
   draw()
   love.graphics.present()
-  local renderscale = flags.parsed.renderscale+0.1
-  local canvas = love.graphics.newCanvas(w*renderscale, h*renderscale)
+  local renderscale = flags.parsed.renderscale
+  local canvas = love.graphics.newCanvas(w*renderscale+1, h*renderscale+1)
   love.graphics.setCanvas {
     canvas;
     stencil = true, depth = false;

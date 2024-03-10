@@ -19,7 +19,12 @@ flags.register('proplist') {
 }
 
 flags.register('mapgen') {
-  help = 'generate www/map.html and immediately exit';
+  help = 'generate HTML map viewer and immediately exit';
+}
+
+flags.register('genimages') {
+  help = 'generate terrain images. This is very expensive so if the terrain hasn\'t changed consider turning it off.';
+  default = true;
 }
 
 local function main(...)

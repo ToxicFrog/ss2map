@@ -93,7 +93,9 @@ local function mkMap(js, mis, idx, name)
   }
   io.writefile(out .. "/" .. idx .. ".js", js:interpolate(data))
 
-  render.drawToFile(out .. '/' .. idx .. '.png')
+  if flags.parsed.genimages then
+    render.drawToFile(out .. '/' .. idx .. '.png')
+  end
 
   return map
 end
