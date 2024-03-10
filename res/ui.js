@@ -66,6 +66,23 @@ function showMap(i) {
   }
 }
 
+function loadBackground(map) {
+  if (map.bg) return;
+  map.bgimage = new Image();
+  map.bgimage.onload = function() {
+    let terrain = new Kinetic.Image({
+      x: map.bbox.x, y: map.bbox.y,
+      image: map.bgimage,
+      width: map.bbox.w,
+      height: map.bbox.h,
+    })
+    map.mapLayer.add(terrain);
+    console.log('added terrain layer', terrain);
+    map.mapLayer.draw();
+  }
+  map.bgimage.src = map.index+'.png';
+}
+
 function initMap() {
   if (map.stage)
     return;
@@ -83,6 +100,8 @@ function initMap() {
   map.mapLayer = new Kinetic.Layer(layersize); // level geometry
   map.hitLayer = new Kinetic.Layer(layersize);  // mouse event trap
   map.searchLayer = new Kinetic.Layer(layersize) // search result hilighting
+
+  loadBackground(map);
 
   map.objLayers = [] // objects, by object class
   for (var i = 0; i < 15 ; ++i) {
