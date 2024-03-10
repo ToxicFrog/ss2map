@@ -114,8 +114,12 @@ function initMap() {
   map.stage.add(map.searchLayer)
 
   if (!map.scale) {
-    map.scale = 1.4;
-    map.pan = { x: 0, y: 0 };
+    // It's our first time viewing this map, so set up pan/zoom to center the
+    // map in the viewport.
+    map.pan = { x: map.bbox.x+map.bbox.w/2, y: -(map.bbox.y+map.bbox.h)+map.bbox.h/2 };
+    map.scale = 1.0;
+    setScale(Math.min(map.stage.width()/map.bbox.w, map.stage.height()/map.bbox.h) * 0.95);
+    console.log(map.bbox, map.pan, map.scale)
   }
   applyPanAndZoom(map);
 }
@@ -255,4 +259,17 @@ function unhilightSearchResult(obj) {
     delete obj._hilight
     map.searchLayer.draw()
   }
+}
+
+function setScale(scale) {
+  let oldscale = map.scale;
+  map.scale = Math.max(0.2, scale);
+  let ratio = map.scale/oldscale;
+  map.pan.x *= ratio;
+  map.pan.y *= ratio;
+  applyPanAndZoom(map);
+}
+
+function tweakScale(delta) {
+  setScale(map.scale + delta);
 }

@@ -68,8 +68,8 @@ function installPanZoomHandlers(container) {
 
   container.addEventListener('mousemove', function(evt) {
     if (!dragging) return false;
-    map.pan.x = dragstate.panX - (evt.pageX - dragstate.startX) ///map.scale;
-    map.pan.y = dragstate.panY - (evt.pageY - dragstate.startY) ///map.scale;
+    map.pan.x = dragstate.panX - (evt.pageX - dragstate.startX)
+    map.pan.y = dragstate.panY - (evt.pageY - dragstate.startY)
     applyPanAndZoom(map);
   });
 
@@ -79,12 +79,7 @@ function installPanZoomHandlers(container) {
   })
 
   container.addEventListener('wheel', function(evt) {
-    let oldscale = map.scale;
-    map.scale = Math.max(0.2, map.scale + evt.wheelDelta * 0.0002);
-    let ratio = map.scale/oldscale;
-    map.pan.x *= ratio;
-    map.pan.y *= ratio;
-    applyPanAndZoom(map);
+    tweakScale(evt.wheelDelta * 0.0004);
     evt.preventDefault();
   }, false);
 }
