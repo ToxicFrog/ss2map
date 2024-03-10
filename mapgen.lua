@@ -1,5 +1,6 @@
 -- HTML map exporter for SS2.
 -- Adapted from the ss1 map exporter.
+local render = require 'render'
 
 local function point(layer, x, y, colour, id)
   return "point(%d, %f, %f, '%s', '%d');" % {
@@ -73,19 +74,26 @@ local function mkMap(js, mis, idx, name)
   local map = { level = idx; name = name; }
 
   local objMap,objInfo = drawObjects(mis)
+  render.init(mis)
+  local x,y,w,h = render.getBBox()
 
   local data = {
     INDEX = idx;
     BASENAME = tostring(idx);
     WIDTH = 1024;
     HEIGHT = 1024;
-    SCALE = 1;
+    BBOX_X = x;
+    BBOX_Y = y;
+    BBOX_W = w;
+    BBOX_H = h;
     TILE_INFO = "";
     OBJECT_INFO = table.concat(objInfo, ",\n    ");
     WALLS = table.concat(objMap, '\n    ');
     LEVEL_TITLE = map.name;
   }
   io.writefile(out .. "/" .. idx .. ".js", js:interpolate(data))
+
+  render.drawToFile(out .. '/' .. idx .. '.png')
 
   return map
 end

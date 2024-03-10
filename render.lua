@@ -14,6 +14,16 @@
 -- Finally, we draw "bad brushes", which are brushes for which the rendering is
 -- known to be wrong.
 
+flags.register('rotatehack') {
+  help = 'Rotate the view of the map so it matches up with the in-game compass and automap rather than with ShockEd'
+}
+
+flags.register('renderscale') {
+  help = 'Scale the HTML map to this value';
+  type = flags.number;
+  default = 2.0;
+}
+
 local rotatehack = false;
 local brushes = {}
 local brushtypes = {
@@ -70,6 +80,7 @@ end
 
 local function init(mis)
   rotatehack = mis.chunks.MAPPARAM.rotatehack
+  brushes = {}
 
   -- Group brushes based on what we need in the different rendering passes
   for _,brush in ipairs(mis.chunks.BRLIST) do
@@ -100,7 +111,7 @@ end
 
 -- convert worldspace coordinates to screenspace coordinates
 local function world2screen(x, y)
-  do return x,-y end
+  do return x,y end
 end
 
 local function drawRotatedRectangle(mode, x, y, width, height, angle)
@@ -129,16 +140,68 @@ local function zoom(dz)
   scale = scale + dz
 end
 
-local function prepare(w, h)
+local function prepare()
+  local w,h = love.window.getMode()
   love.graphics.translate(w/2, h/2)
-  love.graphics.scale(scale)
+  love.graphics.scale(scale, scale)
   love.graphics.translate(tx, ty)
+  love.graphics.scale(1, -1) -- invert Y since LGS uses southwest rather than northwest gravity
   love.graphics.setLineWidth(1/scale)
-  if rotatehack then
-    love.graphics.rotate(math.rad(180))
-  else
-    love.graphics.rotate(math.rad(90))
+  if flags.parsed.rotatehack then
+    if rotatehack then
+      love.graphics.rotate(math.rad(180))
+    else
+      love.graphics.rotate(math.rad(90))
+    end
   end
+end
+
+-- Get the lowest (x,y) value that could be overlapped by this brush.
+-- Don't worry about rotation, just assume worst-case rotation around every axis.
+local function getBrushMinima(brush)
+  return
+    brush.position.x - math.max(brush.size.x, brush.size.y, brush.size.z),
+    brush.position.y - math.max(brush.size.x, brush.size.y, brush.size.z)
+end
+
+-- As above but finds the maximum possible overlapping coordinates.
+local function getBrushMaxima(brush)
+  return
+    brush.position.x + math.max(brush.size.x, brush.size.y, brush.size.z),
+    brush.position.y + math.max(brush.size.x, brush.size.y, brush.size.z)
+end
+
+-- Get the x,y bounding box for the entire level, as (x,y,w,h), based on brush
+-- positions and sizes.
+local function getBBoxAux(minX, minY, maxX, maxY, brushes, ...)
+  if not brushes then return minX, minY, maxX-minX, maxY-minY end
+
+  for _,brush in ipairs(brushes) do
+    local brushX,brushY = getBrushMinima(brush)
+    minX = minX:min(brushX)
+    minY = minY:min(brushY)
+    brushX,brushY = getBrushMaxima(brush)
+    maxX = maxX:max(brushX)
+    maxY = maxY:max(brushY)
+  end
+
+  return getBBoxAux(minX, minY, maxX, maxY, ...)
+end
+
+local function getBBox()
+  return getBBoxAux(
+    math.huge, math.huge, -math.huge, -math.huge,
+    brushes.air, brushes.decor, brushes.walls, brushes.objects)
+end
+
+local function prepareCanvas()
+  scale = flags.parsed.renderscale
+  local x,y,w,h = getBBox()
+  love.graphics.scale(scale, -scale) -- invert Y since LGS uses southwest rather than northwest gravity
+  love.graphics.translate(-x + w/20/scale, -(y+h) - h/20/scale)
+  love.graphics.setLineWidth(1/scale)
+  love.graphics.setColor(1,0,1,1)
+  love.graphics.rectangle('line', x, y, w, h)
 end
 
 -- Draw outer volumes of air brushes.
@@ -246,9 +309,12 @@ local function drawBadBrushes(brushes, ...)
 end
 
 local function draw()
-  local w,h = love.window.getMode()
   love.graphics.push()
-  prepare(w, h)
+  if love.graphics.getCanvas() then
+    prepareCanvas()
+  else
+    prepare()
+  end
   drawAir(brushes.air)
   drawDecorations(brushes.decor)
   drawWalls(brushes.walls)
@@ -258,9 +324,30 @@ local function draw()
   love.graphics.pop()
 end
 
+local function drawToFile(filename)
+  local x,y,w,h = getBBox()
+  scale = 0.5
+  tx, ty = 0, 0
+  love.graphics.clear()
+  draw()
+  love.graphics.present()
+  local renderscale = flags.parsed.renderscale+0.1
+  local canvas = love.graphics.newCanvas(w*renderscale, h*renderscale)
+  love.graphics.setCanvas {
+    canvas;
+    stencil = true, depth = false;
+  }
+  draw()
+  love.graphics.setCanvas()
+  print('PNG', filename)
+  io.writefile(filename, canvas:newImageData():encode('png'):getString())
+end
+
 return {
   init = init;
   draw = draw;
   zoom = zoom;
   pan = pan;
+  drawToFile = drawToFile;
+  getBBox = getBBox;
 }
