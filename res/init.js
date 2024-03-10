@@ -68,6 +68,7 @@ function installPanZoomHandlers(container) {
 
   container.addEventListener('mousemove', function(evt) {
     if (!dragging) return false;
+    map.dragging = true;
     map.pan.x = dragstate.panX - (evt.pageX - dragstate.startX)
     map.pan.y = dragstate.panY - (evt.pageY - dragstate.startY)
     applyPanAndZoom(map);
@@ -75,6 +76,7 @@ function installPanZoomHandlers(container) {
 
   container.addEventListener('mouseup', function(evt) {
     dragging = false;
+    map.dragging = false;
     dragstate = {};
   })
 

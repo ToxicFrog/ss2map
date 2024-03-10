@@ -17,6 +17,10 @@ function writeMessage(node) {
 function lockMessage(lock) {
   messageLocked = lock
 }
+function clearMessage() {
+  info = document.getElementById("info")
+  clearChildren(info)
+}
 
 function infoToTable(info) {
   var buf = document.createElement("table");
@@ -77,7 +81,6 @@ function loadBackground(map) {
       height: map.bbox.h,
     })
     map.mapLayer.add(terrain);
-    console.log('added terrain layer', terrain);
     map.mapLayer.draw();
   }
   map.bgimage.src = map.index+'.png';
@@ -96,9 +99,8 @@ function initMap() {
     height: container.getBoundingClientRect().height
   })
 
-  let layersize = { x: map.bbox.x, y: map.bbox.y, width: map.bbox.w, height: map.bbox.h }
+  let layersize = { x: -map.bbox.x, y: -map.bbox.y, width: map.bbox.w, height: map.bbox.h }
   map.mapLayer = new Kinetic.Layer(layersize); // level geometry
-  map.hitLayer = new Kinetic.Layer(layersize);  // mouse event trap
   map.searchLayer = new Kinetic.Layer(layersize) // search result hilighting
 
   loadBackground(map);
@@ -108,26 +110,15 @@ function initMap() {
     map.objLayers[i] = new Kinetic.Layer(layersize);
   }
 
-  map.hitLayer.add(new Kinetic.Rect({x:0, y:0, width: map.width, height: map.height}));
-  // map.hitLayer.on('mousemove', function(evt) {
-  //   var xy = map.stage.getPointerPosition();
-  //   var x = Math.floor(xy.x/SCALE);
-  //   var y = Math.floor(map.height - xy.y/SCALE);
-  //   // writeMessage(tileInfo(x, y))
-  // });
-  map.hitLayer.on('mousedown', function() { lockMessage(false); })
-
-  map.mapLayer.add(new Kinetic.Rect({
-    x: 0, y: 0,
-    width: map.width*SCALE, height: map.height*SCALE,
-    fill: '#000000',
-  }))
-
   map.drawTerrain()
   drawSearchResults()
 
+  // map.searchLayer.hitGraphEnabled(true);
+  // map.searchLayer.on('mousedown', function() { lockMessage(false); clearMessage(); })
+  map.mapLayer.hitGraphEnabled(true);
+  map.mapLayer.on('click', function() { if (map.dragging) return; lockMessage(false); clearMessage(); })
+
   map.stage.add(map.mapLayer);
-  map.stage.add(map.hitLayer);
   for (var i = 0; i < 15; ++i) {
     map.stage.add(map.objLayers[i])
   }
@@ -136,10 +127,9 @@ function initMap() {
   if (!map.scale) {
     // It's our first time viewing this map, so set up pan/zoom to center the
     // map in the viewport.
-    map.pan = { x: map.bbox.x+map.bbox.w/2, y: -(map.bbox.y+map.bbox.h)+map.bbox.h/2 };
+    map.pan = { x: map.bbox.w/2, y: map.bbox.h/2 };
     map.scale = 1.0;
     setScale(Math.min(map.stage.width()/map.bbox.w, map.stage.height()/map.bbox.h) * 0.95);
-    console.log(map.bbox, map.pan, map.scale)
   }
   applyPanAndZoom(map);
 }
@@ -157,7 +147,6 @@ function drawSearchResults() {
 function destroyMap() {
   map.stage.destroy()
   delete map.mapLayer
-  delete map.hitLayer
   delete map.objLayers
   delete map.searchLayer
   delete map.stage
@@ -272,9 +261,7 @@ function hilightSearchResult(level, obj) {
 }
 
 function unhilightSearchResult(obj) {
-  console.log("unhilight", map.index, obj)
   if (obj._hilight) {
-    console.log("actually removing hilight")
     obj._hilight.destroy()
     delete obj._hilight
     map.searchLayer.draw()

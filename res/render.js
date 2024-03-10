@@ -17,8 +17,18 @@ function point(layer, x, y, colour, id) {
   });
   obj.on('mouseover', function() {
     writeMessage(objectInfo(id));
+    obj.setStroke('#FFFFFF');
+    obj.draw();
   });
-  obj.on('mousedown', function() { lockMessage(false); writeMessage(objectInfo(id)); lockMessage(true); })
+  obj.on('mouseout', function() {
+    // clearMessage();
+    obj.setStroke(colour);
+    obj.draw();
+  });
+  obj.on('mousedown', function() {
+    lockMessage(false); writeMessage(objectInfo(id)); lockMessage(true);
+    // TODO: display a persistent highlight on the locked object
+  })
   map.objLayers[layer].add(obj);
 }
 
