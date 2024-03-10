@@ -37,6 +37,15 @@
       table.toplevel {
         margin: 0; border: 0; padding: 0;
       }
+      div.search-container {
+        overflow: auto;
+        height: 90vh;
+        width: 100%;
+      }
+      table#search-results {
+        height: fit-content;
+        /* overflow: scroll; */
+      }
     </style>
     <script>
       var DEFAULT = ${DEFAULT_LEVEL}
@@ -100,13 +109,14 @@
             <button type="button" onclick="performSearch(true);">Search All</button>
           </form>
           <hr>
-          <!-- TODO: this should be scrollable independent of the rest of the page -->
-          <table id="search-results">
-            <tr>
-              <th>Lv</th>
-              <th style="text-align: left">Name</th>
-            </tr>
-          </table>
+          <div class="search-container">
+            <table id="search-results">
+              <tr>
+                <th>Lv</th>
+                <th style="text-align: left">Name</th>
+              </tr>
+            </table>
+          </div>
         </td>
       </tr>
     </table>
