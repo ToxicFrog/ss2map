@@ -10,8 +10,9 @@ function line(x1, y1, x2, y2, colour) {
 function point(layer, x, y, colour, id) {
   var obj = new Kinetic.Circle({
     x: x, y: -y,
-    radius: SCALE/4,
+    radius: 2,
     stroke: colour,
+    strokeWidth: 0.5,
     //fill: colour,
   });
   obj.on('mouseover', function() {
