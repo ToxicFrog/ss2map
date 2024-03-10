@@ -79,13 +79,14 @@ function initMap() {
     height: container.getBoundingClientRect().height
   })
 
-  map.mapLayer = new Kinetic.FastLayer({ x: 0, y: 0, width: map.width }); // level geometry
-  map.hitLayer = new Kinetic.Layer({ x: 0, y: 0, width: map.width, opacity: 0 });  // mouse event trap
-  map.searchLayer = new Kinetic.Layer({ x: 0, y: 0, width: map.width }) // search result hilighting
+  let layersize = { x: map.bbox.x, y: map.bbox.y, width: map.bbox.w, height: map.bbox.h }
+  map.mapLayer = new Kinetic.Layer(layersize); // level geometry
+  map.hitLayer = new Kinetic.Layer(layersize);  // mouse event trap
+  map.searchLayer = new Kinetic.Layer(layersize) // search result hilighting
 
   map.objLayers = [] // objects, by object class
   for (var i = 0; i < 15 ; ++i) {
-    map.objLayers[i] = new Kinetic.Layer({ x: 0, width: map.width });
+    map.objLayers[i] = new Kinetic.Layer(layersize);
   }
 
   map.hitLayer.add(new Kinetic.Rect({x:0, y:0, width: map.width, height: map.height}));

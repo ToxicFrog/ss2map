@@ -83,7 +83,7 @@ local function mkMap(js, mis, idx, name)
     WIDTH = 1024;
     HEIGHT = 1024;
     BBOX_X = x;
-    BBOX_Y = y;
+    BBOX_Y = -(y+h);
     BBOX_W = w;
     BBOX_H = h;
     TILE_INFO = "";

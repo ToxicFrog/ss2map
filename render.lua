@@ -160,15 +160,15 @@ end
 -- Don't worry about rotation, just assume worst-case rotation around every axis.
 local function getBrushMinima(brush)
   return
-    brush.position.x - math.max(brush.size.x, brush.size.y, brush.size.z),
-    brush.position.y - math.max(brush.size.x, brush.size.y, brush.size.z)
+    brush.position.x - math.max(brush.size.x, brush.size.y, brush.size.z) * 1.1,
+    brush.position.y - math.max(brush.size.x, brush.size.y, brush.size.z) * 1.1
 end
 
 -- As above but finds the maximum possible overlapping coordinates.
 local function getBrushMaxima(brush)
   return
-    brush.position.x + math.max(brush.size.x, brush.size.y, brush.size.z),
-    brush.position.y + math.max(brush.size.x, brush.size.y, brush.size.z)
+    brush.position.x + math.max(brush.size.x, brush.size.y, brush.size.z) * 1.1,
+    brush.position.y + math.max(brush.size.x, brush.size.y, brush.size.z) * 1.1
 end
 
 -- Get the x,y bounding box for the entire level, as (x,y,w,h), based on brush
