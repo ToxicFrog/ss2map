@@ -36,8 +36,8 @@ function target(layer, x, y) {
   layer.add(new Kinetic.Star({
     x: x, y: -y,
     numPoints: 4,
-    innerRadius: 0.1*SCALE,
-    outerRadius: 0.4*SCALE,
+    innerRadius: 0.1,
+    outerRadius: 0.4,
     stroke: '#FFFFFF',
     fill: '#FFFFFF',
   }))
@@ -46,8 +46,9 @@ function target(layer, x, y) {
 function hilight(layer, x, y) {
   var circle = new Kinetic.Circle({
     x: x, y: -y,
-    radius: SCALE,
+    radius: 4,
     stroke: '#FF00FF',
+    strokeWidth: 1,
   })
   layer.add(circle)
   return circle
