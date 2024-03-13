@@ -124,9 +124,31 @@ local function drawRotatedRectangle(mode, x, y, width, height, angle)
   love.graphics.pop()
 end
 
+-- Returns the on-screen width and height of a brush's bounding box by applying
+-- its pitch and bank rotation fields. (Heading is applied when we actually
+-- draw it). For 90° rotations this is exact; other rotations are approximate.
+local function getRotatedWH(brush)
+  local x_size,y_size,z_size = brush.size.x, brush.size.y, brush.size.z
+  local bank, pitch = brush.rotation.x*math.pi, brush.rotation.y*math.pi
+
+  -- apply bank (rotaton around x) first, affecting the relationship between the
+  -- y and z axes.
+  y_size,z_size =
+    y_size * bank:cos() + z_size * bank:sin(),
+    y_size * bank:sin() + z_size * bank:cos()
+
+  -- now apply pitch, affecting the rotation between x and z
+  x_size,z_size =
+    x_size * pitch:cos() + z_size * pitch:sin(),
+    x_size * pitch:sin() + z_size * pitch:cos()
+
+  return x_size, y_size
+end
+
 local function drawBrush(mode, brush)
   local x,y = world2screen(brush.position.x, brush.position.y)
-  drawRotatedRectangle(mode, x, y, brush.size.x, brush.size.y, brush.rotation.z*math.pi)
+  local w,h = getRotatedWH(brush)
+  drawRotatedRectangle(mode, x, y, w, h, brush.rotation.z*math.pi)
 end
 
 local tx,ty = 0,0
@@ -284,21 +306,8 @@ end
 -- multiples of 180, in pink brushes where they are rotations of 90,
 -- and in red brushes rotated at other angles.
 local function drawBadBrush(brush)
-  local xr,yr = brush.rotation.x, brush.rotation.y
-  local xr90 = xr % 0.5 == 0
-  local yr90 = yr % 0.5 == 0
-  local xr180 = xr % 1 == 0
-  local yr180 = yr % 1 == 0
-  if xr + yr ~= 0 then
-    if xr180 and yr180 then
-      love.graphics.setColor(1, 0, 1, 1.0)
-    elseif xr90 and yr90 then
-      love.graphics.setColor(1, 0, 1, 1.0)
-    else
-      love.graphics.setColor(1, 1, 0, 1.0)
-    end
-  elseif brush.shape.family ~= 0 or brush.shape.index ~= 1 then -- not a cube? o noes
-    love.graphics.setColor(1, 0, 0, 1.0)
+  if brush.shape.family ~= 0 or brush.shape.index ~= 1 then -- not a cube? o noes
+    love.graphics.setColor(1, 0, 0, 0.2)
   else
     return
   end
