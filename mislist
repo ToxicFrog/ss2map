@@ -56,9 +56,11 @@ end
 local function listobjs(mis, props, include_metaprops)
   for id,brush in pairs(mis.chunks.BRLIST.by_type[-3]) do
     local pos = brush.position
+    local rot = brush.rotation
     local name = mis:getProp(brush.primal, 'SymName', true)
-    printf('[%10d] %s @ (%.2f,%.2f,%.2f)\n',
-        brush.primal, name, pos.x, pos.y, pos.z)
+    printf('[%10d] %s @ (%.2f,%.2f,%.2f) ϴ° (H:%d P:%d B:%d)\n',
+        brush.primal, name, pos.x, pos.y, pos.z,
+        rot.z * 180, rot.y * 180, rot.x * 180)
     local types = typeChain(mis, brush.primal)
     if #types > 1 then
       printf('  Types: %s\n', table.concat(types, ' <- '))
