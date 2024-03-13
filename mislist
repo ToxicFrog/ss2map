@@ -36,16 +36,41 @@ flags.register('inherited') {
   help = 'when listing object properties, include inherited properties';
 }
 
+flags.register('links') {
+  help = 'list all object links';
+}
+
+local function typeChain(mis, id)
+  local chain = {}
+  while id do
+    local name = mis:getProp(id, 'SymName')
+    if name then
+      table.insert(chain, name)
+      chain[name] = true
+    end
+    id = mis:derefLink(id, 'MetaProp')
+  end
+  return chain
+end
+
 local function listobjs(mis, props, include_metaprops)
   for id,brush in pairs(mis.chunks.BRLIST.by_type[-3]) do
     local pos = brush.position
     local name = mis:getProp(brush.primal, 'SymName', true)
-    local basename = mis:getProp(mis:derefLink(brush.primal, 'MetaProp'), 'SymName')
-    printf('[%08x] %s @ (%.2f,%.2f,%.2f)%s\n',
-        brush.primal, name, pos.x, pos.y, pos.z, basename and ' -- '..basename or '')
+    printf('[%10d] %s @ (%.2f,%.2f,%.2f)\n',
+        brush.primal, name, pos.x, pos.y, pos.z)
+    local types = typeChain(mis, brush.primal)
+    if #types > 1 then
+      printf('  Types: %s\n', table.concat(types, ' <- '))
+    end
     if props then
       for k,v,inherited in mis:propPairs(brush.primal, include_metaprops) do
         printf('  %s %-16s %s\n', inherited and '+' or ' ', k..':', v)
+      end
+    end
+    if flags.parsed.links then
+      for type,dst in pairs(mis.links[brush.primal]) do
+        printf('  -> %s %d\n', type, dst)
       end
     end
   end
