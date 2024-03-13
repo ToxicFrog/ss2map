@@ -17,13 +17,17 @@ local Coord = vstruct.compile('Coord', [[ x:f4 y:f4 z:f4 ]])
 
 -- Rotation. These are all in Dark engine "angle units", 1/64k-ths of a circle.
 -- We read them as 1.15 fixed point values, which gives a range of [0,2), which
--- means we can convert them into radians just by multiplying by pi.
--- I suspect that the way these are actually applied is:
--- - heading (z) first, rotating the object's x and y axes in the process; this
---   gives you "faces-towards"
--- - then pitch (not sure if x or y here); this gives you "points-at"
--- - then rotate around the object's remaining axis for bank
-local Rotation = vstruct.compile('Rotation', [[ x:p2,15 y:p2,15 z:p2,15 ]])
+-- means we can convert them into radians just by multiplying by pi, and into
+-- degrees by multiplying by 180.
+-- In Dromed these are displayed as HPB (heading-pitch-bank), corresponding to
+-- rotation about the z-y-x axes.
+-- The way they are interpreted is:
+-- - rotation about Z (heading) is applied first, determining which compass
+--   direction the object points in
+-- - then rotation about Y (pitch), giving you elevation above or below the
+--   horizon; +90° has you pointing directly up, +270° directly down.
+-- - and then rotation around its X axis
+local Rotation = vstruct.compile('Rotation', [[ x:pu2,15 y:pu2,15 z:pu2,15 ]])
 
 -- An actual brush definition. Some of these fields are really hairy and
 -- require additional postprocessing that we don't do yet.
