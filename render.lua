@@ -212,7 +212,7 @@ end
 -- Draw outer volumes of air brushes.
 local function drawAir(brushes)
   -- draw outer edge of each brush
-  love.graphics.setLineWidth(2/scale)
+  love.graphics.setLineWidth(4/scale)
   for _,brush in ipairs(brushes) do
     love.graphics.setColor(0, 0.5, 0.7, 1)
     drawBrush('line', brush)
