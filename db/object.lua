@@ -20,7 +20,6 @@ function object.wrap(obj, db)
   })
 end
 
-
 -- Return the object's human-readable name.
 -- This is, in descending priority:
 -- - (TODO) the name from strings/objshort.str
@@ -29,7 +28,7 @@ end
 -- if none of these are available it falls back to the object type.
 function object:getName()
   return self.name
-    or self:getProperty('SymName')
+    or self:getProperty('SymName'):pprint()
     or '[anonymous %s]' % self.meta.type
 end
 
@@ -46,7 +45,7 @@ function object:getProperty(name, inherit)
   if inherit == nil then inherit = true end
 
   if self.meta.props[name] then
-    return self.meta.props[name].value
+    return self.meta.props[name]
   elseif inherit then
     for link in self:getLinks('MetaProp') do
       local prop = link:deref():getProperty(name, true)
