@@ -27,11 +27,12 @@ local function supports(tag)
 end
 
 local function load(db, chunk, data)
-  -- TODO: read the proplist.txt, select the full property name, and deserialize
-  -- the property data.
+  -- Need proplist.txt loaded to do anything
+  if not db._plist then return end
+
   local key = chunk.tag:sub(3,-1)
   for prop in ObjProp:records(data) do
-    local value = proplist.read(key, prop.data)
+    local value = db._plist:read(key, prop.data)
     -- Create a blank entity object if one doesn't already exist
     db:merge {
       meta = { id = prop.oid, type = 'entity'; };

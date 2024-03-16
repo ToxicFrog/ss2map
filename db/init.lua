@@ -36,6 +36,7 @@
 -- When using the db, you will usually call db:get(id) to get individual objects,
 -- or db:pairs(type) to iterate over all objects of a given type.
 local loader = require 'db.loader'
+local proplist = require 'db.proplist'
 
 local db = {}
 db.__index = db
@@ -60,6 +61,10 @@ end
 -- Load the given file into the database.
 function db:load(file)
   loader.load(self, file)
+end
+
+function db:load_proplist(file)
+  self._plist = proplist.load(file)
 end
 
 local function byType(db, type)

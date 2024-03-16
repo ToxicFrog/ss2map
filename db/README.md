@@ -11,6 +11,9 @@ First, create a database and load some files into it:
 
     local DB = require 'db'
     local db = DB.new()
+    -- Load the proplist.txt first, if you want support for entity properties
+    db:load_proplist('proplist.txt')
+    -- Then load the gamesys and mission file
     db:load('shock2.gam')
     db:load('earth.mis')
 
