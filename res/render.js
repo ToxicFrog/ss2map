@@ -48,7 +48,7 @@ function target(layer, x, y) {
 function hilight(layer, x, y) {
   var circle = new Kinetic.Circle({
     x: x, y: -y,
-    radius: 4,
+    radius: 16/map.scale,
     stroke: '#FF00FF',
     strokeWidth: 1,
   })
