@@ -17,28 +17,23 @@ local proplist = require 'db.proplist'
 -- type mapping. We can get it from newdark with the dump_props_full or
 -- dump_props console commands. DarkDB handles this by hardcoding it.
 local ObjProp = vstruct.compile('ObjProp', [[
-  id:i4
+  oid:i4
   size:u4
-  value:s#size
+  data:s#size
 ]])
 
 local function supports(tag)
   return tag:match('^P%$')
 end
 
-local function load(self, chunk, data)
+local function load(db, chunk, data)
   -- TODO: read the proplist.txt, select the full property name, and deserialize
   -- the property data.
-  chunk.prop_name = chunk.meta.tag:sub(3,-1)
-  chunk.props = {}
+  local key = chunk.tag:sub(3,-1)
   for prop in ObjProp:records(data) do
-    prop.value = proplist.read(chunk.prop_name, prop.value)
-    -- per-chunk maps for property -> id -> value
-    chunk.props[prop.id] = prop.value
-    -- also update the per-file id -> property -> value map
-    self:addProp(prop.id, chunk.prop_name, prop.value)
+    local value = proplist.read(key, prop.data)
+    db:setProp(prop.oid, key, value)
   end
-  return chunk
 end
 
 return {

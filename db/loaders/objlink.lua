@@ -17,20 +17,43 @@ local ObjLink = vstruct.compile('ObjLink', [[
 ]])
 
 local function supports(tag)
-  return tag:match('^L%$')
+  return tag:match('^L%$') or tag:match('^LD%$')
 end
 
-local function load(self, chunk, data)
+local function loadLink(db, chunk, data)
   -- TODO: read the proplist.txt to get the full link name.
-  chunk.link_name = chunk.meta.tag:sub(3,-1)
-  chunk.links = {}
+  local tag = chunk.tag:gsub('^.-%$', ''):sub(1, 8)
   for link in ObjLink:records(data) do
-    -- per-chunk maps gives us link type -> src -> dst
-    chunk.links[link.src] = link.dst
-    -- also update the per-file src -> type -> dst map
-    self:addLink(link.src, chunk.link_name, link.dst)
+    db:merge {
+      meta = { id = link.id; type = 'link'; };
+      tag = tag;
+      src = link.src;
+      dst = link.dst;
+    }
   end
-  return chunk
+end
+
+local function loadLinkData(db, chunk, data)
+  local tag = chunk.tag:gsub('^.-%$', ''):sub(1, 8)
+  if tag == 'MetaProp' then
+    -- No support for other LinkData yet, but see DarkDBLinkDefs.h for details
+    -- of the other types.
+    data = vstruct.cursor(data:sub(5))
+    for id,prio in vstruct.records('i4 u4', data, true) do
+      db:merge {
+        meta = { id = id; type = 'link'; };
+        priority = prio;
+      }
+    end
+  end
+end
+
+local function load(db, chunk, data)
+  if chunk.tag:match('^L%$') then
+    return loadLink(db, chunk, data)
+  else
+    return loadLinkData(db, chunk, data)
+  end
 end
 
 return {

@@ -41,7 +41,7 @@ local Rotation = vstruct.compile('Rotation', [[ x:pu2,15 y:pu2,15 z:pu2,15 ]])
 -- first to define open volumes, and then solid brushes are placed inside them
 -- to add detail.
 local Brush = vstruct.compile('Brush', [[
-  id:u2
+  meta.id:u2
   time:u2
   shape:{
     -- family is 1 for cylinders, 2 for pyramids, 3 for corner pyramids, and 0 for everything else
@@ -110,21 +110,20 @@ end
 -- TODO: additional postprocessing; stringify brush types and shapes, add
 -- convenience functions for rendering, intersection detection, etc. We might
 -- want to pull these out into separate files for different kinds of brush.
-local function load(self, chunk, data)
-  chunk.by_type = {}
+local function load(db, chunk, data)
   local cursor = vstruct.cursor(data)
-  while cursor.pos < chunk.toc.size do
-    vstruct.read('{ &Brush }', cursor, chunk)
-    local brush = chunk[#chunk]
-    chunk.by_type[brush.type] = chunk.by_type[brush.type] or {}
-    chunk.by_type[brush.type][brush.id] = brush
+  while cursor.pos < chunk.size do
+    local brush = Brush:read(cursor)
     if brush.type >= 0 then
       -- Only terrain-type brushes use nrof_faces for the actual number of faces
       brush.faces.n = brush.nrof_faces
       vstruct.read('#n * { &BrushFace }', cursor, brush.faces)
     end
+    -- TODO: I have a horrible feeling here that IDs are not globally unique but
+    -- instead scoped per type, so there is both a brush ID 1 and an object ID 1.
+    brush.meta.type = 'brush'
+    db:insert(brush)
   end
-  return chunk
 end
 
 return {

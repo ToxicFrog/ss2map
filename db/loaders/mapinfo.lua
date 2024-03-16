@@ -4,9 +4,9 @@ local function supports(tag)
   return tag == 'MAPPARAM'
 end
 
-local function load(self, chunk, data)
-  vstruct.readvals('rotatehack:b4', data, chunk)
-  return chunk
+local function load(db, chunk, data)
+  -- TODO: setFlag
+  -- db:setFlag('rotatehack', vstruct.readvals('b4', data))
 end
 
 return {

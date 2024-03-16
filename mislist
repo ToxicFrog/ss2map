@@ -6,7 +6,7 @@
 ]]
 
 require 'util'
-local tagfile = require 'db.tagfile'
+local db = require 'db'
 local proplist = require 'db.proplist'
 
 flags.register('help', 'h', '?') {
@@ -53,28 +53,64 @@ local function typeChain(mis, id)
   return chain
 end
 
-local function listobjs(mis, props, include_metaprops)
-  for id,brush in pairs(mis.chunks.BRLIST.by_type[-3]) do
-    local pos = brush.position
-    local rot = brush.rotation
-    local name = mis:getProp(brush.primal, 'SymName', true)
-    printf('[%10d] %s @ (%.2f,%.2f,%.2f) ϴ° (H:%d P:%d B:%d)\n',
-        brush.primal, name, pos.x, pos.y, pos.z,
-        rot.z * 180, rot.y * 180, rot.x * 180)
-    local types = typeChain(mis, brush.primal)
-    if #types > 1 then
-      printf('  Types: %s\n', table.concat(types, ' <- '))
+local function loadDB(args)
+  if args.proplist then
+    print('PROPS', args.proplist)
+    proplist.load(args.proplist)
+  else
+    print('WARNING: no --proplist specified, entity property data will be unavailable')
+  end
+
+  local db = db.new()
+  if args.gamesys then
+    print('GAMESYS', args.gamesys)
+    db:load(args.gamesys)
+  end
+  print('MIS', args[1])
+  db:load(args[1])
+
+  return db
+end
+
+local function printObj(db, obj, pos, rot)
+  printf('%s @ (%.2f,%.2f,%.2f) ϴ° (H:%d P:%d B:%d)\n',
+    tostring(obj),
+    pos.x, pos.y, pos.z,
+    rot.z * 180, rot.y * 180, rot.x * 180)
+  -- FIXME: this needs to handle branching inheritance chains
+  -- local types = typeChain(mis, brush.primal)
+  -- if #types > 1 then
+  --   printf('  Types: %s\n', table.concat(types, ' <- '))
+  -- end
+end
+
+local function listObjs(db, props, metaprops, links)
+  for id,brush in db:objects('brush') do
+    -- Skip everything that isn't an object placement brush.
+    if brush.type ~= -3 then goto continue end
+    local obj = db:object(brush.primal)
+    printObj(db, obj, brush.position, brush.rotation)
+
+    if links then
+      print('  Links:')
+      for link in obj:getLinks() do
+        printf('    %s\n', link)
+      end
     end
+
     if props then
-      for k,v,inherited in mis:propPairs(brush.primal, include_metaprops) do
-        printf('  %s %-16s %s\n', inherited and '+' or ' ', k..':', v)
+      local src = obj
+      print('  Properties:')
+      for prop in obj:getProperties(metaprops) do
+        if prop.obj ~= src then
+          src = prop.obj
+          printf('  via %s:\n', src)
+        end
+        printf('    %s: %s\n', prop.key, prop.value)
       end
     end
-    if flags.parsed.links then
-      for type,dst in pairs(mis.links[brush.primal]) do
-        printf('  -> %s %d\n', type, dst)
-      end
-    end
+
+    ::continue::
   end
 end
 
@@ -86,20 +122,8 @@ local function main(...)
     os.exit(1)
   end
 
-  if args.proplist then
-    proplist.load(args.proplist)
-  else
-    print('WARNING: no --proplist specified, entity property data will be unavailable')
-  end
-
-  local gam; if args.gamesys then gam = tagfile(args.gamesys) end
-  local mis = tagfile(args[1], gam)
-
-  if args.objects then
-    listobjs(mis, args.props, args.inherited)
-  end
-
-  return mis
+  local db = loadDB(args)
+  listObjs(db, args.props, args.inherited, args.links)
 end
 
 return main(...)
