@@ -54,8 +54,13 @@ end
 -- Useful for situations where you want to load the gamesys once and then
 -- load multiple different mission files in isolation using it.
 function db:clone()
-  local clone = table.copy(self)
-  return setmetatable(clone, db)
+  local clone = db.new()
+  clone._plist = self._plist -- read-only, so safe to share
+  -- in an ideal world individual objects would be readonly, but it turns out
+  -- that, e.g., you can load archetype -1 from the gamesys and then rename it
+  -- in the OBJ_MAP of earth.mis and now everything is horrible.
+  clone._objects = table.copy(self._objects)
+  return clone
 end
 
 -- Load the given file into the database.
@@ -92,9 +97,9 @@ local link = require 'db.link'
 -- Automatically chooses the correct wrapper based on the object's type.
 function db:wrap(obj)
   if obj.meta.type == 'link' then
-    return link.wrap(obj)
+    return link.wrap(obj, self)
   else
-    return object.wrap(obj)
+    return object.wrap(obj, self)
   end
 end
 
@@ -131,7 +136,6 @@ function db:insert(obj)
   assertf(otype, 'db:insert(%d): meta.type field is required', oid)
   self._objects[otype] = self._objects[otype] or {}
   assert(not self._objects[otype][oid], 'db:insert(%d): a %s object with this id already exists', oid, otype)
-  obj.meta.db = self
   obj.meta.props = {}
   obj.meta.links = {}
   self._objects[otype][oid] = obj

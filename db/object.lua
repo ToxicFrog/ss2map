@@ -7,15 +7,18 @@
 -- dereferencing, MetaProp-aware property reading, and whatnot.
 
 local object = {}
-object.__index = object
 
 function object:__tostring()
   return string.format('%s (%d)', self:getName(), self.meta.id)
 end
 
-function object.wrap(obj)
-  return setmetatable(obj, object)
+function object.wrap(obj, db)
+  return setmetatable(obj, {
+    __index = object;
+    __db = db;
+  })
 end
+
 
 -- Return the object's human-readable name.
 -- This is, in descending priority:
@@ -87,14 +90,14 @@ function object:getLinks(type)
   if type then
     return coroutine.wrap(function()
       for _,ln in pairs(self.meta.links[type] or {}) do
-        coroutine.yield(self.meta.db:wrap(ln))
+        coroutine.yield(getmetatable(self).__db:wrap(ln))
       end
     end)
   else
     return coroutine.wrap(function()
       for type in pairs(self.meta.links) do
         for ln in self:getLinks(type) do
-          coroutine.yield(self.meta.db:wrap(ln))
+          coroutine.yield(getmetatable(self).__db:wrap(ln))
         end
       end
     end)

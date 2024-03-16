@@ -8,7 +8,6 @@
 
 local object = require 'db.object'
 local link = table.copy(object)
-link.__index = link
 
 function link:__tostring()
   local function nameOf(oid)
@@ -23,8 +22,11 @@ function link:__tostring()
     self.tag, self.meta.id, nameOf(self.src), nameOf(self.dst))
 end
 
-function link.wrap(obj)
-  return setmetatable(obj, link)
+function link.wrap(obj, db)
+  return setmetatable(obj, {
+    __index = link;
+    __db = db;
+  })
 end
 
 -- Dereference the link and return the object pointed to. `dir` can be either
@@ -32,7 +34,7 @@ end
 function link:deref(dir)
   dir = dir or 'dst'
   assert(dir == 'src' or dir == 'dst', 'link:deref(): dir must be either "src" or "dst"')
-  return self.meta.db:object(self[dir])
+  return getmetatable(self).__db:object(self[dir])
 end
 
 return link
