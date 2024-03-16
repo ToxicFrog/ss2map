@@ -32,6 +32,24 @@ function object:getName()
     or '[anonymous %s]' % self.meta.type
 end
 
+-- Get the "fully qualified typename" of the object. This is a slash-separated
+-- heirarchy starting with Object, produced by walking the object's MetaProp
+-- links.
+function object:getFQTN()
+  local function aux(obj, ...)
+    if obj.meta.id == -1 then -- Object archetype
+      return { obj:getName(), ... }
+    end
+    for link in obj:getLinks('MetaProp') do
+      local path = aux(link:deref(), obj:getName(), ...)
+      if path then return path end
+    end
+  end
+
+  local path = aux(self)
+  if path then return table.concat(path, '/', 1, #path-1) end
+end
+
 function object:setProperty(key, prop)
   prop = table.copy(prop)
   prop.obj = self;
