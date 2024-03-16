@@ -53,6 +53,7 @@ local function main(...)
     print('MAP', mis)
     maps[i] = db:clone()
     maps[i]:load(mis)
+    maps[i].name = mis
   end
 
   if args.mapgen then

@@ -30,11 +30,11 @@ function love.keypressed(key)
     end
   elseif key == 'n' then
     mis_index = (mis_index % #missions) + 1
-    print('Switching to mission '..mis_index)
+    print('Switching to  '..missions[mis_index].name)
     render.init(missions[mis_index])
   elseif key == 'p' then
     mis_index = (mis_index - 2) % #missions + 1
-    print('Switching to mission '..mis_index)
+    print('Switching to  '..missions[mis_index].name)
     render.init(missions[mis_index])
   end
 end
