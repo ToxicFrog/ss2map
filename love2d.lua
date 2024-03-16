@@ -22,9 +22,9 @@ function love.draw()
 end
 
 function love.load(argv)
-  local mis = main(table.unpack(argv))
+  local db = main(table.unpack(argv))
   love.window.setMode(1280, 960)
-  render.init(mis)
+  render.init(db)
 end
 
 return function(f)

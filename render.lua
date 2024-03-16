@@ -78,12 +78,13 @@ local function isWall(brush, rooms)
   return false
 end
 
-local function init(mis)
-  rotatehack = mis.chunks.MAPPARAM.rotatehack
+local function init(db)
+  -- rotatehack = mis.chunks.MAPPARAM.rotatehack
+  rotatehack = false
   brushes = {}
 
   -- Group brushes based on what we need in the different rendering passes
-  for _,brush in ipairs(mis.chunks.BRLIST) do
+  for _,brush in db:objects('brush') do
     local typename = brushtypes[brush.type] or 'other'
     brushes[typename] = brushes[typename] or {}
     table.insert(brushes[typename], brush)
@@ -102,11 +103,6 @@ local function init(mis)
   -- Z-order sort
   brushSort(brushes.air)
   brushSort(brushes.walls)
-
-  -- print('Loaded:')
-  -- for k,v in pairs(brushes) do
-  --   print('', k, #v)
-  -- end
 end
 
 -- convert worldspace coordinates to screenspace coordinates

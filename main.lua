@@ -1,8 +1,7 @@
 #!/usr/bin/env lua
 require 'util'
-local vstruct = require 'vstruct'
-local tagfile = require 'db.tagfile'
-local proplist = require 'db.proplist'
+local DB = require 'db'
+local mapgen = require 'mapgen'
 
 flags.register('help', 'h', '?') {
   help = 'display this text';
@@ -30,36 +29,34 @@ flags.register('genimages') {
 local function main(...)
   local args = flags.parse {...}
   if args.help or #args < 1 then
-    print('Usage: mismap [flags] [--gamesys=shock.gam] map.mis')
+    print('Usage: mismap [flags] [--gamesys=shock.gam] [--proplist=proplist.txt] map.mis')
     print(flags.help())
     os.exit(1)
   end
 
+  local db = DB.new()
+
   if args.proplist then
     print('PROPS', args.proplist)
-    proplist.load(args.proplist)
+    db:load_proplist(args.proplist)
   else
     print('WARNING: no --proplist specified, entity property data will be unavailable')
   end
 
-  if args.mapgen then
-    require 'mapgen'
-  end
-
-  local gam
   if args.gamesys then
     print('GAMESYS', args.gamesys)
-    gam = tagfile(args.gamesys)
+    db:load(args.gamesys)
   end
 
   local maps = {}
   for i,mis in ipairs(args) do
     print('MAP', mis)
-    maps[i] = tagfile(mis, gam)
+    maps[i] = db:clone()
+    maps[i]:load(mis)
   end
 
   if args.mapgen then
-    require 'mapgen' (maps)
+    mapgen(maps)
     os.exit(0)
   end
 
