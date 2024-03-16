@@ -16,6 +16,7 @@ flags.register('help', 'h', '?') {
 flags.register('gamesys') {
   help = 'path to gamesys, e.g. shock.gam';
   type = flags.string;
+  required = true;
 }
 
 flags.register('proplist') {
@@ -84,27 +85,27 @@ local function printObj(db, obj, pos, rot)
   -- end
 end
 
-local function listObjs(db, props, metaprops, links)
+local function listObjs(db, args)
   for id,brush in db:objects('brush') do
     -- Skip everything that isn't an object placement brush.
     if brush.type ~= -3 then goto continue end
     local obj = db:object(brush.primal)
     printObj(db, obj, brush.position, brush.rotation)
 
-    if links then
+    if args.links then
       print('  Links:')
       for link in obj:getLinks() do
         printf('    %s\n', link)
       end
     end
 
-    if props then
+    if args.props then
       local src = obj
       print('  Properties:')
-      for prop in obj:getProperties(metaprops) do
+      for prop in obj:getProperties(args.inherited) do
         if prop.obj ~= src then
           src = prop.obj
-          printf('  via %s:\n', src)
+          printf('  Properties via %s:\n', src)
         end
         printf('    %s: %s\n', prop.key, prop.value)
       end
@@ -117,13 +118,13 @@ end
 local function main(...)
   local args = flags.parse {...}
   if args.help or #args < 1 then
-    print('Usage: mismap [flags] [--gamesys=shock.gam] map.mis')
+    print('Usage: mismap [flags] --gamesys=shock.gam map.mis')
     print(flags.help())
     os.exit(1)
   end
 
   local db = loadDB(args)
-  listObjs(db, args.props, args.inherited, args.links)
+  listObjs(db, args)
 end
 
 return main(...)

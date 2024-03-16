@@ -32,7 +32,11 @@ local function load(db, chunk, data)
   local key = chunk.tag:sub(3,-1)
   for prop in ObjProp:records(data) do
     local value = proplist.read(key, prop.data)
-    db:setProp(prop.oid, key, value)
+    -- Create a blank entity object if one doesn't already exist
+    db:merge {
+      meta = { id = prop.oid, type = 'entity'; };
+    }
+    db:object(prop.oid):setProperty(key, value)
   end
 end
 

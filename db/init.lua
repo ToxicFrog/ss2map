@@ -43,14 +43,8 @@ db.__index = db
 -- Create a new, empty database.
 function db.new()
   local self = {
-    -- map from ID to object
+    -- map meta.type => meta.id => object
     _objects = {};
-    -- map of type => ID => object
-    _objects_by_type = {};
-    -- properties set during the loading process, which will be applied to the
-    -- actual objects at the end of loading
-    -- map of ID => key => value
-    _properties = {};
   }
   return setmetatable(self, db)
 end
@@ -68,13 +62,22 @@ function db:load(file)
   loader.load(self, file)
 end
 
+local function byType(db, type)
+  if not db._objects[type] then
+    db._objects[type] = {}
+  end
+  return db._objects[type]
+end
+
 -- Get a single object from the database. Throws if there is no object with the
--- given ID.
-function db:object(id)
-  if self._objects[id] then
-    return self:wrap(self._objects[id])
+-- given ID. The object type defaults to 'entity' if unspecified.
+function db:object(id, type)
+  type = type or 'entity'
+  local obj = byType(self, type)[id]
+  if obj then
+    return self:wrap(obj)
   else
-    return nil,'no object with id '..id
+    return nil,'no '..type..' with id '..id
   end
 end
 
@@ -91,14 +94,25 @@ function db:wrap(obj)
 end
 
 -- Iterate over all objects of a given type. If type is omitted, iterates over
--- all objects in the db.
+-- all objects in the db. Note that in the latter case you may get duplicate IDs,
+-- as IDs are not unique across object types -- look at obj.meta.type if you
+-- need to differentiate different types.
 function db:objects(type)
-  local t = type and (self._objects_by_type[type] or {}) or self._objects
-  return coroutine.wrap(function()
-    for k,v in pairs(t) do
-      coroutine.yield(k, self:wrap(v))
-    end
-  end)
+  if type then
+    return coroutine.wrap(function()
+      for k,v in pairs(byType(self, type)) do
+        coroutine.yield(k, self:wrap(v))
+      end
+    end)
+  else
+    return coroutine.wrap(function()
+      for _,objs in pairs(self._objects) do
+        for k,v in pairs(objs) do
+          coroutine.yield(k, self:wrap(v))
+        end
+      end
+    end)
+  end
 end
 
 -- Setter functions below are generally used by loaders when deserializing chunks
@@ -107,51 +121,42 @@ end
 -- Insert an object into the database. meta.id and meta.type fields are required.
 -- If an object of the given name already exists, throws.
 function db:insert(obj)
-  assert(obj.meta.id and obj.meta.type, 'db:insert(): meta.id and meta.type fields are required')
-  assert(not self._objects[obj.meta.id], 'db:insert(): object '..obj.meta.id..' already exists')
+  local oid,otype = obj.meta.id, obj.meta.type
+  assert(oid, 'db:insert(): meta.id field is required')
+  assertf(otype, 'db:insert(%d): meta.type field is required', oid)
+  self._objects[otype] = self._objects[otype] or {}
+  assert(not self._objects[otype][oid], 'db:insert(%d): a %s object with this id already exists', oid, otype)
   obj.meta.db = self
   obj.meta.props = {}
   obj.meta.links = {}
-  self._objects[obj.meta.id] = obj
-  self._objects_by_type[obj.meta.type] = self._objects_by_type[obj.meta.type] or {}
-  self._objects_by_type[obj.meta.type][obj.meta.id] = obj
+  self._objects[otype][oid] = obj
 end
 
--- Update an object already in the database. meta.id is required. Data fields
--- will be merged into the existing object. Throws if there is no such object
--- to update.
+-- Update an object already in the database. meta.id and meta.type are required.
+-- Data fields will be merged into the existing object. Throws if there is no
+-- such object to update.
 function db:update(obj)
-  local oid = obj.meta.id
+  local oid,otype = obj.meta.id, obj.meta.type
   assert(oid, 'db:update(): meta.id field is required')
-  assertf(self._objects[oid], 'db:update(%d): no object with this id', oid)
-  if obj.meta.type then
-    assertf(self._objects[oid].meta.type == obj.meta.type,
-      'db:update(%d): mismatched types: %s != %s',
-      oid, self._objects[oid].meta.type, obj.meta.type)
-  end
+  assertf(otype, 'db:update(%d): meta.type field is required', oid)
+  local old = assert(self:object(oid, otype))
+  assertf(old.meta.type == obj.meta.type,
+    'db:update(%d): mismatched types: %s != %s',
+    oid, old.meta.type, obj.meta.type)
 
-  -- local function merger(k, v1, v2)
-  --   if k == 'meta' then return v1 end
-  --   return table.mergeDupes(k, v1, v2)
-  -- end
-
-  table.mergeWith(self._objects[obj.meta.id], obj, table.mergeDupes)
-end
-
--- Set a property on an object.
--- The property won't actually be available until DB loading is complete.
-function db:setProp(oid, key, value)
-  self._properties[oid] = self._properties[oid] or {}
-  self._properties[oid][key] = value
+  table.mergeWith(old, obj, table.mergeDupes)
 end
 
 -- Create or update an object. meta.id and meta.type are required. Behaves like
 -- update() if the object already exists and like insert() if it does not.
 function db:merge(obj)
-  if not self._objects[obj.meta.id] then
-    return self:insert(obj)
-  else
+  local oid,otype = obj.meta.id, obj.meta.type
+  assert(oid, 'db:merge(): meta.id field is required')
+  assertf(otype, 'db:merge(%d): meta.type field is required', oid)
+  if self:object(oid, otype) then
     return self:update(obj)
+  else
+    return self:insert(obj)
   end
 end
 

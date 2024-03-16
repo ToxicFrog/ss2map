@@ -28,26 +28,10 @@ function loader.load(db, path)
   for chunk,data in tagfile.chunks_from(path) do
     loadChunk(db, chunk, data)
   end
-  -- We have now populated the object table, and need to postprocess any properties
-  -- and link objects. Properties first:
-  for oid,props in pairs(db._properties) do
-    local obj = db:object(oid)
-    if not obj then
-      -- We haven't seen this object. Create a 'generic' object to hold the
-      -- properties we've seen associated with this ID; most likely the real
-      -- object lives in a chunk we can't decode yet.
-      db:insert { meta = { id = oid; type = 'generic'; }; }
-      obj = db:object(oid)
-    end
-    if obj then
-      for k,v in pairs(props) do
-        obj.meta.props[k] = { key = k; value = v; obj = obj; }
-      end
-      db._properties[oid] = nil
-    end
-  end
   -- Now process links. These are first-class objects so we just walk the db
-  -- normally.
+  -- normally and insert links into their source objects' meta.links field.
+  -- If the source or destination doesn't exist we just skip the link.
+  -- TODO: handle dangling links better?
   for oid,link in db:objects('link') do
     local src,dst = link:deref('src'), link:deref('dst')
     if src and dst then

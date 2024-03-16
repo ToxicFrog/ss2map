@@ -22,6 +22,14 @@ function object:getName()
     or '[anonymous %s]' % self.meta.type
 end
 
+function object:setProperty(key, value)
+  self.meta.props[key] = {
+    key = key;
+    value = value;
+    obj = self;
+  }
+end
+
 -- Get a named property on the object. Returns the underlying value of the property.
 -- If `inherit` is true, will search along MetaProp links if the
 -- property isn't found in the leaf object. Defaults to true.
