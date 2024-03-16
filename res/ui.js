@@ -233,7 +233,7 @@ function objectMatches(obj, name) {
 var short_levels = [
   "🌐", "🛰",
   "🔧1", "🔧2", "🧪1", "🧪2", "🌿1", "🌿2", "🌿3", "🖧1", "🖧2", "🖧3", "🖧4", "🏀1", "🏀2", "🏀3",
-  "🗡1", "🗡1", "🗡1", "🧠", "🖳"
+  "🗡1", "🗡2", "🗡3", "🧠", "🖳"
 ]
 function appendSearchResult(level, obj) {
   var results = document.getElementById("search-results")
