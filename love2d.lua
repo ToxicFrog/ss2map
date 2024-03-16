@@ -4,6 +4,14 @@ local main
 local missions = nil
 local mis_index = 1
 
+local function hotReload()
+  package.loaded.render = nil
+  local new_render = require 'render'
+  new_render.init(missions[mis_index])
+  new_render.draw()
+  render = new_render
+end
+
 function love.keypressed(key)
   if key == 'up' then render.pan(0, -16)
   elseif key == 'down' then render.pan(0, 16)
@@ -12,6 +20,14 @@ function love.keypressed(key)
   elseif key == 'w' then render.zoom(1/8)
   elseif key == 's' then render.zoom(-1/8)
   elseif key == 'q' then love.event.push('quit')
+  elseif key == 'r' then
+    print('Hot-reloading renderer...')
+    local result,err = pcall(hotReload)
+    if not result then
+      print('Error reloading:', err)
+    else
+      print('Reload complete!')
+    end
   elseif key == 'n' then
     mis_index = (mis_index % #missions) + 1
     print('Switching to mission '..mis_index)
