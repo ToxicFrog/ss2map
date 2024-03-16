@@ -7,10 +7,6 @@ local function point(layer, x, y, colour, id)
     layer, x, y, colour, id }
 end
 
-local function hex(s)
-  return (s:gsub(".", function(c) return ("%02X "):format(c:byte()) end):sub(1,-2))
-end
-
 local function addinfo(buf, k, v)
   if type(v) == 'string' then
     table.insert(buf, "[%q,%q]" % { k, v })
@@ -21,38 +17,35 @@ local function addinfo(buf, k, v)
   end
 end
 
-local function objectinfo(mis, brush)
+local function objectinfo(db, brush)
   local oid = brush.primal
+  local obj = assert(db:object(oid))
   local pos = brush.position
   local rot = brush.rotation
   local buf = {}
 
-  local name = mis:getProp(brush.primal, 'SymName', true)
-  local baseid = mis:derefLink(brush.primal, 'MetaProp')
-  local basename = mis:getProp(baseid, 'SymName')
-  local objname = mis:getProp(brush.primal, 'ObjName', true)
+  local fqtn = obj:getFQTN()
 
-  addinfo(buf, "name", '%s (%d)' % { name, oid })
-  addinfo(buf, "base", '%s (%d)' % { basename, baseid })
-  if objname then
-    addinfo(buf, "ObjName", objname)
-  end
-  addinfo(buf, "position", '(%.2f, %.2f, %.2f)' % { pos.x, pos.y, pos.z })
-  addinfo(buf, "rotation", 'H:%d° P:%d° B:%d°' % { rot.z*180, rot.x*180, rot.y*180 })
-  addinfo(buf, 'brush id', '%d' % brush.id)
-  for k,v in mis:propPairs(oid, false) do
-    addinfo(buf, k, v)
+  addinfo(buf, "name", tostring(obj))
+  -- replace ' ' with nonbreaking space, then make it breakable around slashes
+  addinfo(buf, "type", fqtn:gsub(' ', ' '):gsub('/', ' » '))
+  addinfo(buf, 'brush id', '%d' % brush.meta.id)
+  addinfo(buf, "brush xyz", '(%.2f, %.2f, %.2f)' % { pos.x, pos.y, pos.z })
+  addinfo(buf, "brush ϴ", 'H:%d° P:%d° B:%d°' % { rot.z*180, rot.x*180, rot.y*180 })
+  for prop in obj:getProperties(false) do
+    addinfo(buf, prop.key_full, prop:pprint())
   end
 
   return [[ "%d": [%s] ]] % { oid, table.concat(buf, ",") }
 end
 
-local function drawObjects(mis)
+local function drawObjects(db)
   local draw = {}
   local info = {}
 
-  for id,brush in pairs(mis.chunks.BRLIST.by_type[-3]) do
-    local obj = objectinfo(mis, brush)
+  for id,brush in db:objects('brush') do
+    if brush.type ~= -3 then goto continue end
+    local obj = objectinfo(db, brush)
     local pos = brush.position
     table.insert(info, obj)
 
@@ -64,17 +57,18 @@ local function drawObjects(mis)
       brush.primal))
 
     -- TODO: doors, brushes?
+    ::continue::
   end
 
   return draw,info
 end
 
-local function mkMap(js, mis, idx, name)
+local function mkMap(js, db, idx, name)
   local out = 'www'
   local map = { level = idx; name = name; }
 
-  local objMap,objInfo = drawObjects(mis)
-  render.init(mis)
+  local objMap,objInfo = drawObjects(db)
+  render.init(db)
   local x,y,w,h = render.getBBox()
 
   local data = {
@@ -128,10 +122,10 @@ local function mkMaps(maplist)
   end
 
   local index = {}
-  for i,mis in ipairs(maplist) do
+  for i,db in ipairs(maplist) do
     i = i-1
-    print('JS', i..'.js', '('..mis.path..')')
-    table.insert(index, mkMap(js, mis, i, mis.path))
+    print('JS', i..'.js', '('..db.name..')')
+    table.insert(index, mkMap(js, db, i, db.name))
   end
 
   mkViewer(html, index)
