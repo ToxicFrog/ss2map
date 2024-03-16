@@ -15,6 +15,7 @@ end
 function object.wrap(obj, db)
   return setmetatable(obj, {
     __index = object;
+    __tostring = object.__tostring;
     __db = db;
   })
 end

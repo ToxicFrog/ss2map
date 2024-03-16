@@ -11,7 +11,7 @@ local link = table.copy(object)
 
 function link:__tostring()
   local function nameOf(oid)
-    local obj = self.meta.db:object(oid)
+    local obj = getmetatable(self).__db:object(oid)
     if not obj then
       return '(%d)' % oid
     else
@@ -25,6 +25,7 @@ end
 function link.wrap(obj, db)
   return setmetatable(obj, {
     __index = link;
+    __tostring = link.__tostring;
     __db = db;
   })
 end
