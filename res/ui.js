@@ -202,8 +202,8 @@ function displaySearchResults() {
 
   for (var i in search_results) {
     var result = search_results[i]
-    if (i > 0 && search_results[i-1].obj.type != result.obj.type) {
-      appendSearchResult(16, {type: "<hr>"})
+    if (i > 0 && search_results[i-1].obj._type != result.obj._type) {
+      appendSearchResult(-1, null)
     }
     appendSearchResult(result.level, result.obj)
   }
@@ -240,6 +240,11 @@ function appendSearchResult(level, obj) {
   results.style.display = ''
   var row = results.insertRow(-1)
   row.className = "search-result"
+  if (level < 0) {
+    row.insertCell(-1);
+    row.insertCell(-1).innerHTML = '<hr>';
+    return;
+  }
   row.onmouseenter = hilightSearchResult.bind(undefined, level, obj)
   row.onmouseleave = unhilightSearchResult.bind(undefined, obj)
   row.onclick = displayAndHilight.bind(undefined, level, obj)
