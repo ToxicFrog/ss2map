@@ -6,7 +6,7 @@
 ]]
 
 require 'util'
-local db = require 'db'
+local DB = require 'db'
 local proplist = require 'db.proplist'
 
 flags.register('help', 'h', '?') {
@@ -37,21 +37,42 @@ flags.register('inherited') {
   help = 'when listing object properties, include inherited properties';
 }
 
+flags.register('ancestry') {
+  help = "print the MetaProp ancestry chain(s) for each object";
+}
+
 flags.register('links') {
   help = 'list all object links';
 }
 
-local function typeChain(mis, id)
-  local chain = {}
-  while id do
-    local name = mis:getProp(id, 'SymName')
-    if name then
-      table.insert(chain, name)
-      chain[name] = true
-    end
-    id = mis:derefLink(id, 'MetaProp')
+local function typeChain(db, obj, path, strip)
+  if path then
+    path = table.copy(path)
+    table.insert(path, obj:getName())
+  else
+    path = { '' }
   end
-  return chain
+  strip = strip or 0
+  local has_parents = false
+
+  for link in obj:getLinks('MetaProp') do
+    if has_parents then
+      -- inheritance tree splits here
+      local prefix_size = #table.concat(path, ' -> ')
+      typeChain(db, link:deref(), path, prefix_size)
+    else
+      typeChain(db, link:deref(), path, strip)
+    end
+    has_parents = true
+  end
+  if not has_parents then
+    local buf = table.concat(path, ' -> ')
+    if strip > 0 then
+      printf('   %'..strip..'s%s\n', '...', buf:sub(strip+1))
+    else
+      printf('   %s\n', buf)
+    end
+  end
 end
 
 local function loadDB(args)
@@ -62,7 +83,7 @@ local function loadDB(args)
     print('WARNING: no --proplist specified, entity property data will be unavailable')
   end
 
-  local db = db.new()
+  local db = DB.new()
   if args.gamesys then
     print('GAMESYS', args.gamesys)
     db:load(args.gamesys)
@@ -78,11 +99,6 @@ local function printObj(db, obj, pos, rot)
     tostring(obj),
     pos.x, pos.y, pos.z,
     rot.z * 180, rot.y * 180, rot.x * 180)
-  -- FIXME: this needs to handle branching inheritance chains
-  -- local types = typeChain(mis, brush.primal)
-  -- if #types > 1 then
-  --   printf('  Types: %s\n', table.concat(types, ' <- '))
-  -- end
 end
 
 local function listObjs(db, args)
@@ -91,6 +107,11 @@ local function listObjs(db, args)
     if brush.type ~= -3 then goto continue end
     local obj = db:object(brush.primal)
     printObj(db, obj, brush.position, brush.rotation)
+
+    if args.ancestry then
+      print('  Ancestry:')
+      typeChain(db, obj)
+    end
 
     if args.links then
       print('  Links:')
