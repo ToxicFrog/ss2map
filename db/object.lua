@@ -17,8 +17,15 @@ function object.wrap(obj)
   return setmetatable(obj, object)
 end
 
+-- Return the object's human-readable name.
+-- This is, in descending priority:
+-- - (TODO) the name from strings/objshort.str
+-- - the name from OBJ_MAP
+-- - the SymName property
+-- if none of these are available it falls back to the object type.
 function object:getName()
-  return self:getProperty('SymName')
+  return self.name
+    or self:getProperty('SymName')
     or '[anonymous %s]' % self.meta.type
 end
 

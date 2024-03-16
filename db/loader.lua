@@ -13,6 +13,7 @@ loader.handlers = {
   require 'db.loaders.brlist';
   require 'db.loaders.objprop';
   require 'db.loaders.objlink';
+  require 'db.loaders.objmap';
 }
 
 local function loadChunk(db, chunk, data)
