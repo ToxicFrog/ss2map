@@ -74,12 +74,24 @@ end
 local function parseBody(self, body)
   local buf = {}
   for name,type,tail in body:gmatch('"(.-)"%s*:%s*(%S+)(.-)\n') do
-    table.insert(buf, {key = name, format = assert(formats[type], type)})
+    table.insert(buf, {
+      key = name;
+      format = assert(formats[type], 'Unknown property field type '..type);
+      ctype = type;
+    })
+    if type == 'enum' then
+      -- parse tail
+    elseif type == 'bitflags' then
+      -- parse tail
+    else
+      -- generic deserializer
+    end
   end
   if #buf == 1 then
     -- only one field!
     self.format = vstruct.compile(buf[1].format)
     self.unpack = true
+    self.dtype = buf[1].ctype
   else
     -- Turns out the field list in proplist.txt is not guaranteed to be in the
     -- correct order, RIP.
@@ -88,6 +100,7 @@ local function parseBody(self, body)
     --   buf[i] = mungeKey(field.key)..':'..field.format
     -- end
     -- self.format = vstruct.compile(table.concat(buf, ' '))
+    self.dtype = 'unknown'
   end
 end
 
@@ -100,29 +113,84 @@ function proplist.parse(buf)
     _propdefs = {}
   }
   setmetatable(self, proplist)
-  for name,ctype,flags,tail,body in buf:gmatch(propdef_matcher) do
+  for key,ctype,flags,tail,body in buf:gmatch(propdef_matcher) do
     local propdef = {
-      name = name;
+      key = key:sub(1,9); -- tagfiles only store the first nine bytes
+      key_full = key;
+      name = tail:match('editor name: "(.-)"');
       ctype = ctype;
       flags = tonumber(flags, 16); -- TODO: figure out what all the flags mean
-      editor_name = tail:match('editor name: "(.-)"');
     }
     parseBody(propdef, body)
-    -- tagfiles only store the first nine bytes of the name
-    self._propdefs[name:sub(1,9)] = propdef
+    self._propdefs[propdef.key] = propdef
   end
   return self
 end
 
-function proplist:read(name, buf)
-  local prop = self._propdefs[name]
-  if not prop or not prop.format then
-    return  '[unknown: '..#buf..' bytes]';
-  elseif prop.unpack then
-    return table.unpack(prop.format:read(buf))
+local printer = {}
+function printer.vector(val)
+  return '(%.2f, %.2f, %.2f)' % { val.x, val.y, val.z }
+end
+function printer.bitflags(val)
+  return '[bitfield: %08X]' % val
+end
+function printer.enum(val)
+  return '[enum: %d]' % val
+end
+function printer.ang(val)
+  return '%d°' % (val * 180)
+end
+function printer.rgb(val)
+  return '#%02X%02X%02X' % { val.r, val.g, val.b }
+end
+function printer.int_hex(val)
+  return '%x' % val
+end
+function printer.uint_hex(val)
+  return '%x' % val
+end
+function printer.unknown(val) return '[unknown: %d bytes]' % #val end
+function printer.default(val) return tostring(val) end
+
+local function pprint(self)
+  if printer[self.dtype] then
+    return printer[self.dtype](self.value)
   else
-    return prop.format:read(buf)
+    return printer.default(self.value)
   end
+end
+
+function proplist:read(name, buf)
+  local propdef = self._propdefs[name]
+  if not propdef then
+    return {
+      name = '[unknown %s]' % name;
+      key = name; key_full = name..'?';
+      value = buf;
+      pprint = pprint;
+      dtype = 'unknown';
+    }
+  elseif not propdef.format then
+    return {
+      name = propdef.name;
+      key = propdef.key; key_full = propdef.key_full;
+      value = buf;
+      pprint = pprint;
+      dtype = 'unknown';
+    }
+  end
+
+  local value = propdef.format:read(buf)
+  if propdef.unpack then
+    value = table.unpack(value)
+  end
+  return {
+    name = propdef.name;
+    key = propdef.key; key_full = propdef.key_full;
+    value = table.unpack(propdef.format:read(buf));
+    pprint = pprint;
+    dtype = propdef.dtype;
+  }
 end
 
 return proplist

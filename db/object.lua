@@ -29,12 +29,10 @@ function object:getName()
     or '[anonymous %s]' % self.meta.type
 end
 
-function object:setProperty(key, value)
-  self.meta.props[key] = {
-    key = key;
-    value = value;
-    obj = self;
-  }
+function object:setProperty(key, prop)
+  prop = table.copy(prop)
+  prop.obj = self;
+  self.meta.props[key] = prop
 end
 
 -- Get a named property on the object. Returns the underlying value of the property.

@@ -69,7 +69,7 @@ local function typeChain(db, obj, path, strip)
   if not has_parents then
     local buf = table.concat(path, ' -> ')
     if strip > 0 then
-      printf('   %'..strip..'s%s\n', '...', buf:sub(strip+1))
+      printf('    ...%'..(strip-4)..'s%s\n', '...', buf:sub(strip+1))
     else
       printf('   %s\n', buf)
     end
@@ -79,13 +79,13 @@ end
 local function loadDB(args)
   local db = DB.new()
 
-  print('PROPS', args.proplist)
+  -- print('PROPS', args.proplist)
   db:load_proplist(args.proplist)
 
-  print('GAMESYS', args.gamesys)
+  -- print('GAMESYS', args.gamesys)
   db:load(args.gamesys)
 
-  print('MIS', args[1])
+  -- print('MIS', args[1])
   db:load(args[1])
 
   return db
@@ -125,8 +125,12 @@ local function listObjs(db, args)
           src = prop.obj
           printf('  Properties via %s:\n', src)
         end
-        printf('    %s: %s\n', prop.key, prop.value)
+        printf('    %-16s: %s\n', prop.key_full, prop:pprint())
       end
+    end
+
+    if args.ancestry or args.links or args.props then
+      print()
     end
 
     ::continue::
