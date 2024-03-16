@@ -60,7 +60,7 @@ local function main(...)
     os.exit(0)
   end
 
-  return maps[1]
+  return maps
 end
 
 if love then
