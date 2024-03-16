@@ -139,7 +139,7 @@ function drawSearchResults() {
   for (var r in search_results) {
     if (search_results[r].level != map.index) continue;
     let pos = search_results[r].obj._position;
-    target(map.searchLayer, pos.x, pos.y)
+    search_results[r].obj._target = target(map.searchLayer, pos.x, pos.y)
   }
   map.searchLayer.draw()
 }
@@ -247,17 +247,34 @@ function appendSearchResult(level, obj) {
   }
   row.onmouseenter = hilightSearchResult.bind(undefined, level, obj)
   row.onmouseleave = unhilightSearchResult.bind(undefined, obj)
-  row.onclick = displayAndHilight.bind(undefined, level, obj)
+  row.onclick = displayAndMark.bind(undefined, level, obj)
   row.insertCell(-1).innerHTML = short_levels[level]
   row.insertCell(-1).innerHTML = obj.name
 }
 
-function displayAndHilight(level, obj) {
+function colourTarget(obj, stroke, fill) {
+  if (!obj._target) return;
+  obj._target.setStroke(stroke)
+  obj._target.setFill(fill)
+  obj._target.moveToTop()
+  obj._target.draw()
+}
+
+function displayAndMark(level, obj) {
+  if (map.marked) {
+    colourTarget(map.marked, '#ffffff', '#ffffff')
+  }
   showMap(level)
-  hilightSearchResult(level, obj)
+  if (map.marked != obj) {
+    colourTarget(obj, '#ff00ff', '#ff80ff')
+    map.marked = obj
+  } else {
+    map.marked = null
+  }
 }
 
 function hilightSearchResult(level, obj) {
+  console.log(obj)
   writeMessage(infoToTable(obj))
   if (level != map.index) return
   let pos = obj._position;

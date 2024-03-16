@@ -33,14 +33,16 @@ function point(layer, x, y, colour, id) {
 }
 
 function target(layer, x, y) {
-  layer.add(new Kinetic.Star({
+  let star = new Kinetic.Star({
     x: x, y: -y,
     numPoints: 4,
     innerRadius: 0.1,
     outerRadius: 0.4,
     stroke: '#FFFFFF',
     fill: '#FFFFFF',
-  }))
+  })
+  layer.add(star)
+  return star
 }
 
 function hilight(layer, x, y) {
