@@ -26,12 +26,12 @@ function infoToTable(info) {
   var buf = document.createElement("table");
   var props = info._props
 
-  for (var p in props) {
+  for (var i in props) {
     var tr = buf.appendChild(document.createElement("tr"));
     var th = tr.appendChild(document.createElement("th"));
-    th.appendChild(document.createTextNode(props[p]));
+    th.appendChild(document.createTextNode(props[i]));
     var td = tr.appendChild(document.createElement("td"));
-    var value = info[props[p]]
+    var value = info[props[i]]
     if (value instanceof Array) {
       for (var i in value) {
         td.appendChild(document.createTextNode(value[i]))
@@ -138,8 +138,8 @@ function drawSearchResults() {
   map.searchLayer.destroyChildren()
   for (var r in search_results) {
     if (search_results[r].level != map.index) continue;
-    var coords = search_results[r].obj.position.split(/[(), ]+/)
-    target(map.searchLayer, Number(coords[1]), Number(coords[2]))
+    let pos = search_results[r].obj._position;
+    target(map.searchLayer, pos.x, pos.y)
   }
   map.searchLayer.draw()
 }
@@ -214,8 +214,8 @@ function displaySearchResults() {
 function nameMatches(obj, name) {
   // TODO: look at the ObjName and ObjShort from the base obj as well
   return obj.name.toLowerCase().search(name) != -1
-      || obj.base.toLowerCase().search(name) != -1
-      || (obj.ObjName && obj.ObjName.toLowerCase().search(name) != -1);
+      || obj._type.toLowerCase().search(name) != -1
+      // || (obj.SymName && obj.ObjName.toLowerCase().search(name) != -1);
 }
 
 function contentsMatch(obj, name) {
@@ -255,8 +255,8 @@ function displayAndHilight(level, obj) {
 function hilightSearchResult(level, obj) {
   writeMessage(infoToTable(obj))
   if (level != map.index) return
-  var coords = obj.position.split(/[(), ]+/)
-  obj._hilight = hilight(map.searchLayer, Number(coords[1]), Number(coords[2]))
+  let pos = obj._position;
+  obj._hilight = hilight(map.searchLayer, pos.x, pos.y)
   map.searchLayer.draw()
 }
 

@@ -8,23 +8,29 @@ local function point(layer, x, y, colour, id)
 end
 
 local function addinfo(buf, k, v)
+  table.insert(buf._props, '%q' % k)
   if type(v) == 'string' then
-    table.insert(buf, "[%q,%q]" % { k, v })
+    table.insert(buf, "%q: %q" % { k, v })
   elseif type(v) == 'number' then
-    table.insert(buf, "[%q,\"%.2f\"]" % { k, v })
+    table.insert(buf, "%q: \"%.2f\"]" % { k, v })
   else
-    table.insert(buf, "[%q,%q]" % { k, tostring(v) })
+    table.insert(buf, "%q: %q" % { k, tostring(v) })
   end
 end
 
 local function objectinfo(db, brush)
   local oid = brush.primal
   local obj = assert(db:object(oid))
+  local fqtn = obj:getFQTN()
   local pos = brush.position
   local rot = brush.rotation
-  local buf = {}
 
-  local fqtn = obj:getFQTN()
+  local buf = {
+    -- Internal data not displayed in the property list
+    '_type: %q' % fqtn,
+    '_position: { x: %f, y: %f, z: %f }' % { pos.x, pos.y, pos.z },
+    _props = {};
+  }
 
   addinfo(buf, "name", tostring(obj))
   -- replace ' ' with nonbreaking space, then make it breakable around slashes
@@ -36,7 +42,11 @@ local function objectinfo(db, brush)
     addinfo(buf, prop.key_full, prop:pprint())
   end
 
-  return [[ "%d": [%s] ]] % { oid, table.concat(buf, ",") }
+  return '"%d": {%s, _props: [%s] }' % {
+    oid,
+    table.concat(buf, ','),
+    table.concat(buf._props, ',')
+  }
 end
 
 local function drawObjects(db)

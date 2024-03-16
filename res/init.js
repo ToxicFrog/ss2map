@@ -41,7 +41,6 @@ window.addEventListener('load', function() {
 
   clearChildren(document.getElementById('map'))
   map = maps[DEFAULT]
-  convertInfo()
   initMap()
   // updateLayers()
   document.getElementById("levelselect").value = map.index
@@ -84,30 +83,4 @@ function installPanZoomHandlers(container) {
     tweakScale(evt.wheelDelta * 0.0004);
     evt.preventDefault();
   }, false);
-}
-
-// Turn objects in the form we get them from the map view generator, as lists
-// of [key,value] pairs, into normal JS objects with a _props property that
-// lists the properties in their original order for display.
-function propListToObject(props) {
-  var obj = { _props: [] }
-  for (var p=0; p < props.length; ++p) {
-    obj._props.push(props[p][0])
-    obj[props[p][0]] = props[p][1]
-  }
-  return obj
-}
-
-function convertInfo() {
-  for (var m in maps) {
-    if (!maps[m]) continue;
-    var objs = maps[m].object_info
-    for (var o in objs) {
-      objs[o] = propListToObject(objs[o])
-    }
-    var tiles = maps[m].tile_info
-    for (var t in tiles) {
-      tiles[t] = propListToObject(tiles[t])
-    }
-  }
 }
