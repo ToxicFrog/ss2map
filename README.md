@@ -13,6 +13,10 @@ Currently it contains three tools:
 The first two are primarily useful for testing and debugging. `mishtml` is the
 main focus, and is what is used to generate [these online SS2 maps](https://funkyhorror.ancilla.ca/toxicfrog/maps/ss2).
 
+It also contains a Lua library for reading Dark Engine tagfiles (`.MIS`/`.GAM`),
+in `db`. It is fairly minimal and only supports the subset of file contents needed
+for these tools, but is designed for extensibility.
+
 ## Prerequisites and Setup
 
 All of these programs are written in Lua. They are only tested with [LuaJIT](https://luajit.org/),
@@ -83,8 +87,8 @@ links.
 Example usage:
 
     mislist \
-      --proplist=proplist.ss2 \
-      --gamesys=ss2/shockscp.gam \
+      --proplist proplist.ss2 \
+      --gamesys ss2/shockscp.gam \
       --links --props --inherited --ancestry \
       ss2/medsci1.mis
 
@@ -102,8 +106,8 @@ renderer.
 It can load multiple maps at once:
 
     misview \
-      --proplist=proplist.ss2 \
-      --gamesys=ss2/shockscp.gam \
+      --proplist proplist.ss2 \
+      --gamesys ss2/shockscp.gam \
       ss2/*.mis
 
 Once loaded, the following controls are available:
@@ -129,6 +133,17 @@ If you just need to regenerate the JSON but not the terrain images, use the
 `--no-genimages` command line flag to speed things up significantly by skipping
 terrain generation.
 
+The output directory needs to exist before it is run. Mission files will be listed
+in the generated maps *in the order specified on the command line*, so make sure
+you use the order you want:
+
+    mkdir -p www/maps
+    mishtml \
+      --proplist proplist.ss2 \
+      --gamesys ss2/shockscp.gam \
+      --html-out www/maps \
+      ss2/{earth,station,eng,medsci,hydro,ops,rec,command}*.mis
+
 ## Known Issues and Future Work
 
 - The terrain renderer currently assumes all terrain brushes are rectangular prisms. This works remarkably well but produces obviously wrong results in a few places. Support for cylinders, pyramids, offset pyramids, and spheres is needed.
@@ -137,6 +152,7 @@ terrain generation.
 - The proplist loader does not support aggregate types (since proplist.txt does not contain sufficient information to decode them). Support for at least some common types, like position and dimensions, should be added.
 - The proplist loader does not support enums or bitflags.
 - All of these programs assume that Y increases towards the top of the screen and X increases towards the right, i.e. southwest gravity. In ShockEd, however, X increases towards the *bottom* of the screen and Y to the *right*, i.e. northwest gravity *with horizontal Y and vertical X*. Since everything else assumes Y is vertical and X is horizontal, fixing this will require some care, although the actual changes needed are probably not extensive.
+- The cute little map icons are hardcoded in the javascript, and thus don't match up with the actual maps as exported if you only export a subset of SS2 maps, or export them in a different order.
 
 ## Credits
 
