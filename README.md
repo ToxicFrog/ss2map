@@ -153,6 +153,7 @@ you use the order you want:
 - The proplist loader does not support enums or bitflags.
 - All of these programs assume that Y increases towards the top of the screen and X increases towards the right, i.e. southwest gravity. In ShockEd, however, X increases towards the *bottom* of the screen and Y to the *right*, i.e. northwest gravity *with horizontal Y and vertical X*. Since everything else assumes Y is vertical and X is horizontal, fixing this will require some care, although the actual changes needed are probably not extensive.
 - The cute little map icons are hardcoded in the javascript, and thus don't match up with the actual maps as exported if you only export a subset of SS2 maps, or export them in a different order.
+- Support for `.DIF` files (easy, they're just another tagfile) and `.DML` files (needs another bespoke parser).
 
 ## Credits
 
