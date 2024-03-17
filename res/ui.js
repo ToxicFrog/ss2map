@@ -175,7 +175,7 @@ function performSearch(all) {
     if (maps[level] && (all || level == map.index)) {
       var objs = maps[level].object_info
       for (obj in objs) {
-        if (!objectMatches(objs[obj], search)) continue;
+        if (!objectMatches(objs, objs[obj], search)) continue;
         search_results.push({level: level, obj: objs[obj]})
       }
     }
@@ -218,16 +218,17 @@ function nameMatches(obj, name) {
       // || (obj.SymName && obj.ObjName.toLowerCase().search(name) != -1);
 }
 
-function contentsMatch(obj, name) {
-  if (!obj.contents) return false
-  for (o in obj.contents) {
-    if (obj.contents[o].toLowerCase().search(name) != -1) return true
+function contentsMatch(objs, obj, name) {
+  if (!obj._contents) return false
+  for (i in obj._contents) {
+    let item = objs[obj._contents[i]]
+    if (objectMatches(objs, item, name)) return true;
   }
   return false
 }
 
-function objectMatches(obj, name) {
-  return nameMatches(obj, name) || contentsMatch(obj, name)
+function objectMatches(objs, obj, name) {
+  return nameMatches(obj, name) || contentsMatch(objs, obj, name)
 }
 
 var short_levels = [

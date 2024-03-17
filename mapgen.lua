@@ -12,7 +12,11 @@ local function addinfo(buf, k, v)
   if type(v) == 'string' then
     table.insert(buf, "%q: %q" % { k, v })
   elseif type(v) == 'number' then
-    table.insert(buf, "%q: \"%.2f\"]" % { k, v })
+    table.insert(buf, "%q: \"%.2f\"" % { k, v })
+  elseif type(v) == 'table' then
+    table.insert(buf, '%q: [%s]' % {
+      k, table.concat(table.map(v, partial(string.format, '%q')), ',')
+    })
   else
     table.insert(buf, "%q: %q" % { k, tostring(v) })
   end
@@ -40,6 +44,19 @@ local function objectinfo(db, brush)
   addinfo(buf, "brush ϴ", 'H:%d° P:%d° B:%d°' % { rot.z*180, rot.x*180, rot.y*180 })
   for prop in obj:getProperties(false) do
     addinfo(buf, prop.key_full, prop:pprint())
+  end
+
+  local contents,contentnames = {},{}
+  for link in obj:getLinks('Contains') do
+    table.insert(contents, tostring(link.dst))
+    table.insert(contentnames, tostring(link:deref()))
+  end
+  if #contents > 0 then
+    -- _contents contains the object IDs and is used for searching;
+    -- contents contains the human-readable object names and is displayed
+    -- in the side panel.
+    table.insert(buf, '_contents: [%s]' % table.concat(contents, ','))
+    addinfo(buf, "contents", contentnames)
   end
 
   return '"%d": {%s, _props: [%s] }' % {
