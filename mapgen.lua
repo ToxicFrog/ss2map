@@ -2,9 +2,9 @@
 -- Adapted from the ss1 map exporter.
 local render = require 'render'
 
-local function point(layer, x, y, colour, id)
-  return "point(%d, %f, %f, '%s', '%d');" % {
-    layer, x, y, colour, id }
+local function point(id, x, y)
+  return "point(objs[%d], %f, %f);" % {
+    id, x, y }
 end
 
 local function addinfo(buf, k, v)
@@ -31,6 +31,7 @@ local function objectinfo(db, brush)
 
   local buf = {
     -- Internal data not displayed in the property list
+    '_id: %d' % oid,
     '_type: %q' % fqtn,
     '_position: { x: %f, y: %f, z: %f }' % { pos.x, pos.y, pos.z },
     _props = {};
@@ -59,11 +60,12 @@ local function objectinfo(db, brush)
     addinfo(buf, "contents", contentnames)
   end
 
-  return '"%d": {%s, _props: [%s] }' % {
-    oid,
-    table.concat(buf, ','),
-    table.concat(buf._props, ',')
-  }
+  return obj,
+    '"%d": {%s, _props: [%s] }' % {
+      oid,
+      table.concat(buf, ','),
+      table.concat(buf._props, ',')
+    }
 end
 
 local function drawObjects(db)
@@ -72,16 +74,15 @@ local function drawObjects(db)
 
   for id,brush in db:objects('brush') do
     if brush.type ~= -3 then goto continue end
-    local obj = objectinfo(db, brush)
+    local obj,objinfo = objectinfo(db, brush)
     local pos = brush.position
-    table.insert(info, obj)
+    table.insert(info, objinfo)
 
     table.insert(draw, point(
-      0, --obj.class,
+      obj.meta.id,
       pos.x,
       pos.y,
-      '#ffff00',
-      brush.primal))
+      obj:getFQTN()))
 
     -- TODO: doors, brushes?
     ::continue::
@@ -143,7 +144,7 @@ local function mkMaps(maplist)
   local html = io.readfile("%s/template.html" % prefix)
   local js = io.readfile("%s/template.js" % prefix)
 
-  for _,file in ipairs { 'init.js', 'kinetic.js', 'loading.png', 'render.js', 'ui.js' } do
+  for _,file in ipairs { 'init.js', 'categories.js', 'kinetic.js', 'loading.png', 'render.js', 'ui.js' } do
     print('STATIC', file)
     io.writefile('www/'..file, io.readfile('res/'..file))
   end

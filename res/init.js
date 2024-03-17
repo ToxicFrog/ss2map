@@ -39,10 +39,11 @@ window.addEventListener('load', function() {
     }
   }
 
+  initCategories()
   clearChildren(document.getElementById('map'))
   map = maps[DEFAULT]
   initMap()
-  // updateLayers()
+  updateLayers()
   document.getElementById("levelselect").value = map.index
   document.title = map.title + " - System Shock 2 Map"
 

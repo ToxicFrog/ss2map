@@ -64,7 +64,7 @@ function showMap(i) {
     map = maps[i]
     initMap()
     document.getElementById('map').appendChild(map.stage.content)
-    // updateLayers()
+    updateLayers()
     document.title = map.title + " - System Shock 2 Map"
     document.getElementById("levelselect").value = i
   }
@@ -106,11 +106,12 @@ function initMap() {
   loadBackground(map);
 
   map.objLayers = [] // objects, by object class
-  for (var i = 0; i < 15 ; ++i) {
-    map.objLayers[i] = new Kinetic.Layer(layersize);
+  var i = 0
+  for (let key in CATEGORIES) {
+    map.objLayers.push(new Kinetic.Layer(layersize))
   }
 
-  map.drawTerrain()
+  map.drawTerrain(map.object_info)
   drawSearchResults()
 
   // map.searchLayer.hitGraphEnabled(true);
@@ -119,7 +120,7 @@ function initMap() {
   map.mapLayer.on('click', function() { if (map.dragging) return; lockMessage(false); clearMessage(); })
 
   map.stage.add(map.mapLayer);
-  for (var i = 0; i < 15; ++i) {
+  for (var i in map.objLayers) {
     map.stage.add(map.objLayers[i])
   }
   map.stage.add(map.searchLayer)
@@ -164,7 +165,7 @@ function showAllLayers(visible) {
   for (var i=0; i < controls.length; ++i) {
     controls[i].checked = visible;
   }
-  // updateLayers();
+  updateLayers();
 }
 
 function performSearch(all) {

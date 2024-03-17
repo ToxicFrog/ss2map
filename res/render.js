@@ -7,29 +7,32 @@ function line(x1, y1, x2, y2, colour) {
   }));
 }
 
-function point(layer, x, y, colour, id) {
-  var obj = new Kinetic.Circle({
+function point(obj, x, y) {
+  let cat = getCategoryForType(obj._type)
+  var circ = new Kinetic.Circle({
     x: x, y: -y,
     radius: 2,
-    stroke: colour,
+    stroke: cat.colour,
     strokeWidth: 0.5,
-    //fill: colour,
   });
-  obj.on('mouseover', function() {
-    writeMessage(objectInfo(id));
+  circ.on('mouseover', function() {
+    writeMessage(objectInfo(obj._id));
     obj.setStroke('#FFFFFF');
     obj.draw();
   });
-  obj.on('mouseout', function() {
+  circ.on('mouseout', function() {
     // clearMessage();
     obj.setStroke(colour);
     obj.draw();
   });
-  obj.on('mousedown', function() {
+  circ.on('mousedown', function() {
     lockMessage(false); writeMessage(objectInfo(id)); lockMessage(true);
     // TODO: display a persistent highlight on the locked object
   })
-  map.objLayers[layer].add(obj);
+  console.log(obj)
+  console.log(cat)
+  console.log(map.objLayers)
+  map.objLayers[cat.index].add(circ);
 }
 
 function target(layer, x, y) {

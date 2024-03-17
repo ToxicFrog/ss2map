@@ -10,7 +10,7 @@ maps[${INDEX}] = {
   object_info: {
     ${OBJECT_INFO}
   },
-  drawTerrain: function() {
+  drawTerrain: function(objs) {
     ${WALLS}
   }
 }
