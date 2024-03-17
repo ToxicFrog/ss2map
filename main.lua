@@ -1,9 +1,6 @@
-#!/usr/bin/env lua
 require 'util'
-local DB = require 'db'
-local mapgen = require 'mapgen'
-local html_mode = os.getenv('MISMAP_MODE') == 'html'
 
+-- common flags
 flags.register('help', 'h', '?') {
   help = 'display this text';
 }
@@ -18,84 +15,27 @@ flags.register('proplist') {
   type = flags.string;
 }
 
-if html_mode then
-  flags.registered.gamesys.required = true
-  flags.registered.proplist.required = true
-
-  flags.register('genimages') {
-    help = 'generate terrain images. This is very expensive so if the terrain hasn\'t changed consider turning it off.';
-    default = true;
-  }
-
-  flags.register('renderscale') {
-    help = 'Scale the HTML map to this value';
-    type = flags.number;
-    default = 4.0;
-  }
-
-  flags.register('html-in') {
-    help = 'Path to the static and template files used to generate the HTML maps.';
-    type = flags.string;
-    required = true;
-  }
-
-  flags.register('html-out') {
-    help = 'Directory to write HTML maps to. It must already exist.';
-    type = flags.string;
-    required = true;
-  }
-
-  -- currently disabled, may be reinstated later
-  -- flags.register('rotatehack') {
-  --   help = 'Rotate the view of the map so it matches up with the in-game compass and automap rather than with ShockEd'
-  -- }
-
-end
-
+-- currently disabled, may be reinstated later
+-- flags.register('rotatehack') {
+--   help = 'Rotate the view of the map so it matches up with the in-game compass and automap rather than with ShockEd'
+-- }
 
 local function main(...)
-  local result,args = pcall(flags.parse, {...})
-  if not result or args.help or #args < 1 then
-    if not result then print(args..'\n') end
-    print('Usage: mismap [flags] [--gamesys=shock.gam] [--proplist=proplist.txt] map.mis')
-    print(flags.help())
+  local mainlib = os.getenv('MISMAP_MAIN')
+  if not mainlib then
+    eprintf('Error: no MISMA_MAIN environment variable -- please run via one of the wrapper scripts\n')
     os.exit(1)
   end
+  local loading = love.graphics.newImage("res/loading.png")
+  local w,h = love.window.getMode()
+  local iw,ih = loading:getDimensions()
+  love.graphics.translate(w/2 - iw/2, h/2 - ih/2)
+  love.graphics.draw(loading, 0, 0)
+  love.graphics.present()
 
-  local db = DB.new()
-
-  if args.proplist then
-    print('PROPS', args.proplist)
-    db:load_proplist(args.proplist)
-  else
-    print('WARNING: no --proplist specified, entity property data will be unavailable')
-  end
-
-  if args.gamesys then
-    print('GAMESYS', args.gamesys)
-    db:load(args.gamesys)
-  else
-    print('WARNING: no --gamesys specified, archetype data will be unavailable')
-  end
-
-  local maps = {}
-  for i,mis in ipairs(args) do
-    print('MAP', mis)
-    maps[i] = db:clone()
-    maps[i]:load(mis)
-    maps[i].name = mis
-  end
-
-  if html_mode then
-    mapgen(maps)
-    os.exit(0)
-  end
-
-  return maps
+  return require(mainlib)(...)
 end
 
-if love then
-  require 'love2d' (main)
-else
-  return main(...)
+function love.load(argv)
+  main(table.unpack(argv))
 end

@@ -1,13 +1,12 @@
 local render = require 'render'
-local main
 
-local missions = nil
-local mis_index = 1
+local maps = nil
+local map_index = 1
 
 local function hotReload()
   package.loaded.render = nil
   local new_render = require 'render'
-  new_render.init(missions[mis_index])
+  new_render.init(maps[map_index])
   new_render.draw()
   render = new_render
 end
@@ -29,13 +28,13 @@ function love.keypressed(key)
       print('Reload complete!')
     end
   elseif key == 'n' then
-    mis_index = (mis_index % #missions) + 1
-    print('Switching to  '..missions[mis_index].name)
-    render.init(missions[mis_index])
+    map_index = (map_index % #maps) + 1
+    print('Switching to  '..maps[map_index].name)
+    render.init(maps[map_index])
   elseif key == 'p' then
-    mis_index = (mis_index - 2) % #missions + 1
-    print('Switching to  '..missions[mis_index].name)
-    render.init(missions[mis_index])
+    map_index = (map_index - 2) % #maps + 1
+    print('Switching to  '..maps[map_index].name)
+    render.init(maps[map_index])
   end
 end
 
@@ -49,12 +48,7 @@ function love.draw()
   render.draw()
 end
 
-function love.load(argv)
-  missions = main(table.unpack(argv))
-  love.window.setMode(1280, 960)
-  render.init(missions[mis_index])
-end
-
-return function(f)
-  main = f
+return function(maplist)
+  maps = maplist
+  map_index = 1
 end

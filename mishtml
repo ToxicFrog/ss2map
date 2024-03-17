@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Wrapper script for the interactive map viewer.
+# Wrapper script for the HTML map generator.
 
 SRCDIR="$(dirname "$0")"
 
@@ -13,5 +13,7 @@ else
   exit 1
 fi
 
-export MISMAP_MAIN="main.misview"
-exec love "$SRCDIR" "$@"
+export MISMAP_MAIN="main.mishtml"
+exec love "$SRCDIR" \
+  --html-in="$SRCDIR/res" \
+  "$@"
