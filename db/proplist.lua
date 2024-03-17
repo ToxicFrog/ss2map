@@ -83,21 +83,28 @@ local function parseBody(self, body)
   end
 
   for name,type,tail in body:gmatch('"(.-)"%s*:%s*(%S+)(.-)\n') do
-    table.insert(buf, {
+    local field = {
       key = name;
       format = assert(formats[type], 'Unknown property field type '..type);
       ctype = type;
-    })
+    }
     if type == 'enum' then
-      -- parse tail
+      field.enum = {}
+      local i = 0
+      for name in (tail..','):gmatch('"(.-)",') do
+        field.enum[i] = name
+        i = i+1
+      end
     elseif type == 'bitflags' then
       -- parse tail
     else
       -- generic deserializer
     end
+    table.insert(buf, field)
   end
   if #buf == 1 then
     -- only one field!
+    self.enum = buf[1].enum
     self.format = vstruct.compile(buf[1].format)
     self.unpack = true
     self.dtype = buf[1].ctype
@@ -137,37 +144,38 @@ function proplist.parse(buf)
 end
 
 local printer = {}
-function printer.vector(val)
-  return '(%.2f, %.2f, %.2f)' % { val.x, val.y, val.z }
+function printer.vector(self)
+  return '(%.2f, %.2f, %.2f)' % { self.value.x, self.value.y, self.value.z }
 end
-function printer.bitflags(val)
-  return '[bitfield: %08X]' % val
+function printer.bitflags(self)
+  return '[bitfield: %08X]' % self.value
 end
-function printer.enum(val)
-  return '[enum: %d]' % val
+function printer.enum(self)
+  assert(self.enum, 'no enum definition for '..self.key_full)
+  return self.enum[self.value] or '[enum: %d]' % self.value
 end
-function printer.ang(val)
-  return '%d°' % (val * 180)
+function printer.ang(self)
+  return '%d°' % (self.value * 180)
 end
-function printer.rgb(val)
-  return '#%02X%02X%02X' % { val.r, val.g, val.b }
+function printer.rgb(self)
+  return '#%02X%02X%02X' % { self.value.r, self.value.g, self.value.b }
 end
-function printer.int_hex(val)
-  return '%x' % val
+function printer.int_hex(self)
+  return '%x' % self.value
 end
-function printer.uint_hex(val)
-  return '%x' % val
+function printer.uint_hex(self)
+  return '%x' % self.value
 end
-function printer.unknown(val)
-  return 'Unknown: '..(val:gsub(".", function(c) return ("%02X "):format(c:byte()) end):sub(1,-2))
+function printer.unknown(self)
+  return 'Unknown: '..(self.value:gsub(".", function(c) return ("%02X "):format(c:byte()) end):sub(1,-2))
 end
-function printer.default(val) return tostring(val) end
+function printer.default(self) return tostring(self.value) end
 
 local function generic_pprint(self)
   if printer[self.dtype] then
-    return printer[self.dtype](self.value)
+    return printer[self.dtype](self)
   else
-    return printer.default(self.value)
+    return printer.default(self)
   end
 end
 
@@ -176,7 +184,7 @@ function proplist:read(name, buf)
   if not propdef then
     return {
       name = '[unknown %s]' % name;
-      key = name; key_full = name..'?';
+      key = name; key_full = '?'..name..'?';
       value = buf;
       pprint = generic_pprint;
       dtype = 'unknown';
@@ -201,6 +209,7 @@ function proplist:read(name, buf)
     value = value;
     pprint = propdef.pprint or generic_pprint;
     dtype = propdef.dtype;
+    enum = propdef.enum;
   }
 end
 
