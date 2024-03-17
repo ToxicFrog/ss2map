@@ -1,7 +1,7 @@
 # ss2map -- tools for System Shock 2 map inspection
 
 This repo contains some small tools for examining System Shock 2 maps. (It also
-works on Thief 1/2 maps, but that is not the main focus and some things may not
+works on Thief 1/2 maps, but that is not the main focus and some things do not
 work as well.)
 
 Currently it contains three tools:
@@ -160,6 +160,7 @@ you use the order you want:
 - The cute little map icons are hardcoded in the javascript, and thus don't match up with the actual maps as exported if you only export a subset of SS2 maps, or export them in a different order.
 - Support for `.DIF` files (easy, they're just another tagfile) and `.DML` files (needs another bespoke parser).
 - Support for `objshort.str` (localized object names) and `levelNN.str` (audio log titles)
+- Ability to read map info out of a separate file, so that map icons and titles don't need to be hardcoded in the frontend and can be different for e.g. Thief vs SS2.
 
 ## Credits
 
