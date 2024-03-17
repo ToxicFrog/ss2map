@@ -17,21 +17,18 @@ function point(obj, x, y) {
   });
   circ.on('mouseover', function() {
     writeMessage(objectInfo(obj._id));
-    obj.setStroke('#FFFFFF');
-    obj.draw();
+    circ.setStroke('#FFFFFF');
+    circ.draw();
   });
   circ.on('mouseout', function() {
     // clearMessage();
-    obj.setStroke(colour);
-    obj.draw();
+    circ.setStroke(cat.colour);
+    circ.draw();
   });
   circ.on('mousedown', function() {
     lockMessage(false); writeMessage(objectInfo(id)); lockMessage(true);
     // TODO: display a persistent highlight on the locked object
   })
-  console.log(obj)
-  console.log(cat)
-  console.log(map.objLayers)
   map.objLayers[cat.index].add(circ);
 }
 
