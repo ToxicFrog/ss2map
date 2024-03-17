@@ -287,9 +287,18 @@ end
 
 local function drawObjects(brushes)
   for _,brush in ipairs(brushes) do
-    love.graphics.setColor(1, 1, 1, 0.5)
-    local x,y = world2screen(brush.position.x, brush.position.y)
-    love.graphics.circle('fill', x, y, 1)
+    -- love.graphics.setColor(1, 1, 1, 0.5)
+    -- local x,y = world2screen(brush.position.x, brush.position.y)
+    -- love.graphics.circle('fill', x, y, 1)
+    local obj = getmetatable(brush).__db:object(brush.primal)
+    if obj:getProperty('TransDoor') then
+      -- TODO: this should use the PhysDims property on the object, once we
+      -- know how to read it accurately.
+      love.graphics.setColor(0, 0, 0, 1)
+      drawBrush('fill', brush)
+      love.graphics.setColor(1, 1, 0, 1)
+      drawBrush('line', brush)
+    end
   end
 end
 
@@ -331,9 +340,7 @@ local function draw()
   drawAir(brushes.air)
   drawDecorations(brushes.decor)
   drawWalls(brushes.walls)
-  if not love.graphics.getCanvas() then
-    drawObjects(brushes.objects)
-  end
+  drawObjects(brushes.objects)
   -- drawUnknown(brushes.other)
   drawBadBrushes(brushes.air, brushes.walls, brushes.decor)
   love.graphics.pop()
