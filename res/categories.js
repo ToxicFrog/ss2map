@@ -14,13 +14,16 @@ let CATEGORIES = [
     ["Object/Physical/Weapon"]),
   category("Goodies", "#00ffff", true,
     "Meds, ammo, audio logs, nanites, keys, etc.",
-    ["Object/Physical/Goodies", "Object/Physical/Keys"]),
+    ["Object/Physical/Goodies", "Object/Physical/Keys",
+     "Object/Physical/Treasure"]),
   category("Critters", "#ff8080", false,
     "Living things that want you dead.",
-    ["Object/Physical/Monsters", "Object/Physical/Monster Accessories"]),
+    ["Object/Physical/Monsters", "Object/Physical/Monster Accessories",
+     "Object/Physical/Creature"]),
   category("Containers", "#A0A0A0", true,
     "Things that can contain other things.",
-    ["Object/Physical/Corpses", "Object/Physical/Functional/Usable Containers"]),
+    ["Object/Physical/Corpses", "Object/Physical/Functional/Usable Containers",
+     "Object/Physical/Container"]),
   category("Plot Items", "#0080ff", false,
     "Plot-related miscellaneous terrain and some items.",
     ["Object/Physical/Plot Items"]),
@@ -29,10 +32,12 @@ let CATEGORIES = [
     ["Object/Physical/Functional"]),
   category("Doors", "#A0A000", true,
     "They open. They shut.",
-    ["Object/Physical/Terrain/Doors"]),
+    ["Object/Physical/Terrain/Doors",
+     "Object/Physical/TerrainLike/Door"]),
   category("Decorative", "#ffffff", false,
     "Decorative, mostly non-interactable objects.",
-    ["Object/Physical/Decorative", "Object/Physical/Lights", "Object/Physical/Terrain"]),
+    ["Object/Physical/Decorative", "Object/Physical/Lights", "Object/Physical/Terrain",
+     "Object/Physical/Furniture"]),
   category("Traps and Triggers", "#ffffff", false,
     "Event triggers, level behaviour contraptions, etc.",
     ["Object/Traps", "Object/Marker"]),
@@ -66,7 +71,7 @@ function getCategoryForType(type) {
     let cat = CATEGORIES[i]
     for (let j in cat.types) {
       // console.log(i, cat.name, '['+cat.types[j]+']', '['+type+']', type.startsWith(cat.types[j]))
-      if (type.startsWith(cat.types[j])) {
+      if (type.toLowerCase().startsWith(cat.types[j].toLowerCase())) {
         return cat
       }
     }

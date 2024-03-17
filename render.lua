@@ -182,18 +182,27 @@ local function getBrushMaxima(brush)
     brush.position.y + math.max(brush.size.x, brush.size.y, brush.size.z) * 1.1
 end
 
+-- True if the brush is infinitely large in at least one dimension
+local function isInfinite(brush)
+  return brush.size.x == math.huge
+    or brush.size.y == math.huge
+    or brush.size.z == math.huge
+end
+
 -- Get the x,y bounding box for the entire level, as (x,y,w,h), based on brush
 -- positions and sizes.
 local function getBBoxAux(minX, minY, maxX, maxY, brushes, ...)
   if not brushes then return minX, minY, maxX-minX, maxY-minY end
 
   for _,brush in ipairs(brushes) do
+    if isInfinite(brush) then goto continue end
     local brushX,brushY = getBrushMinima(brush)
     minX = minX:min(brushX)
     minY = minY:min(brushY)
     brushX,brushY = getBrushMaxima(brush)
     maxX = maxX:max(brushX)
     maxY = maxY:max(brushY)
+    ::continue::
   end
 
   return getBBoxAux(minX, minY, maxX, maxY, ...)

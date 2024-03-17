@@ -24,7 +24,8 @@ end
 
 local function objectinfo(db, brush)
   local oid = brush.primal
-  local obj = assert(db:object(oid))
+  local obj = db:object(oid)
+  if not obj then return nil end
   local fqtn = obj:getFQTN()
   local pos = brush.position
   local rot = brush.rotation
@@ -81,6 +82,8 @@ local function drawObjects(db)
     if brush.type ~= -3 then goto continue end
     local obj,objinfo = objectinfo(db, brush)
     local pos = brush.position
+    -- FIXME: some T1 levels have brushes that reference nonexistent objects!
+    if not obj then goto continue end
     table.insert(info, objinfo)
 
     table.insert(draw, point(
