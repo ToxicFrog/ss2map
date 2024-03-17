@@ -25,7 +25,8 @@ the repo as git submodules, so you should already have them available if you are
 running directly out of the working copy.
 
 `misview` and `mishtml` additionally require the [love2d game engine](https://love2d.org/),
-which is used for rendering and (in the former) input handling.
+which is used for rendering and (in the former) input handling. Due to limitations
+in Love2d's graphics subsystem, `mishtml` cannot operate headless, sorry.
 
 ### Property definitions (proplist.txt)
 
@@ -67,6 +68,10 @@ All tools are launched from a `bash` wrapper script which handles checking for
 the actual program.
 
 All commands can be run with `--help` to list all supported command line flags.
+
+Note that all tools use the (x,y) coordinates for objects as stored in the mission
+file. This does not neccessarily correspond to the in-game compass and automap
+(which can be set arbirarily relative to the MIS file).
 
 ### mislist
 
@@ -124,13 +129,14 @@ If you just need to regenerate the JSON but not the terrain images, use the
 `--no-genimages` command line flag to speed things up significantly by skipping
 terrain generation.
 
-## Future Work
+## Known Issues and Future Work
 
 - The terrain renderer currently assumes all terrain brushes are rectangular prisms. This works remarkably well but produces obviously wrong results in a few places. Support for cylinders, pyramids, offset pyramids, and spheres is needed.
 - The terrain renderer is not good at detecting interior walls constructed via additive geometry.
 - The terrain renderer does not support Z-slicing. This is necessary to sensibly support room-over-room, which is an issue for some SS2 maps and most Thief maps.
 - The proplist loader does not support aggregate types (since proplist.txt does not contain sufficient information to decode them). Support for at least some common types, like position and dimensions, should be added.
 - The proplist loader does not support enums or bitflags.
+- All of these programs assume that Y increases towards the top of the screen and X increases towards the right, i.e. southwest gravity. In ShockEd, however, X increases towards the *bottom* of the screen and Y to the *right*, i.e. northwest gravity *with horizontal Y and vertical X*. Since everything else assumes Y is vertical and X is horizontal, fixing this will require some care, although the actual changes needed are probably not extensive.
 
 ## Credits
 
