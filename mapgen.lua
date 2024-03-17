@@ -139,16 +139,15 @@ local function mkViewer(html, index)
 end
 
 local function mkMaps(maplist)
-  local input = flags.parsed.html_in
   local output = flags.parsed.html_out
 
-  print("Loading templates from %s/template.{html,js}..." % input)
-  local html = io.readfile("%s/template.html" % input)
-  local js = io.readfile("%s/template.js" % input)
+  print("Loading templates from res/template.{html,js}...")
+  local html = love.filesystem.read("res/template.html")
+  local js = love.filesystem.read("res/template.js")
 
   for _,file in ipairs { 'init.js', 'categories.js', 'kinetic.js', 'loading.png', 'render.js', 'ui.js' } do
     print('STATIC', file)
-    io.writefile(output..'/'..file, io.readfile(input..'/'..file))
+    io.writefile(output..'/'..file, love.filesystem.read('res/'..file))
   end
 
   local index = {}

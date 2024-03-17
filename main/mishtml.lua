@@ -17,12 +17,6 @@ flags.register('renderscale') {
   default = 4.0;
 }
 
-flags.register('html-in') {
-  help = 'Path to the static and template files used to generate the HTML maps.';
-  type = flags.string;
-  required = true;
-}
-
 flags.register('html-out') {
   help = 'Directory to write HTML maps to. It must already exist.';
   type = flags.string;
