@@ -44,7 +44,12 @@ local function objectinfo(db, brush)
   addinfo(buf, "brush xyz", '(%.2f, %.2f, %.2f)' % { pos.x, pos.y, pos.z })
   addinfo(buf, "brush ϴ", 'H:%d° P:%d° B:%d°' % { rot.z*180, rot.x*180, rot.y*180 })
   for prop in obj:getProperties(false) do
-    addinfo(buf, prop.key_full, prop:pprint())
+    local info = prop:pprint()
+    if info:match('^Unknown: ') then
+      -- strip 'unknown' prefix and truncate to 24 bytes
+      info = info:sub(10,81)
+    end
+    addinfo(buf, prop.key_full, info)
   end
 
   local contents,contentnames = {},{}
