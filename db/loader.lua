@@ -33,6 +33,8 @@ function loader.load(db, path)
   -- normally and insert links into their source objects' meta.links field.
   -- If the source or destination doesn't exist we just skip the link.
   -- TODO: handle dangling links better?
+  -- TODO: T1 has some LinkData entries without corresponding Link chunks. Bug
+  -- in the loader, or cruft in T1's files?
   for oid,link in db:objects('link') do
     local src,dst = link:deref('src'), link:deref('dst')
     if src and dst then

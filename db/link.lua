@@ -35,6 +35,7 @@ end
 function link:deref(dir)
   dir = dir or 'dst'
   assert(dir == 'src' or dir == 'dst', 'link:deref(): dir must be either "src" or "dst"')
+  if not self[dir] then return nil end
   return getmetatable(self).__db:object(self[dir])
 end
 
