@@ -14,19 +14,6 @@
 -- Finally, we draw "bad brushes", which are brushes for which the rendering is
 -- known to be wrong.
 
--- Only register flags the first time we're loaded.
-if not flags.registered.rotatehack then
-  flags.register('rotatehack') {
-    help = 'Rotate the view of the map so it matches up with the in-game compass and automap rather than with ShockEd'
-  }
-
-  flags.register('renderscale') {
-    help = 'Scale the HTML map to this value';
-    type = flags.number;
-    default = 2.0;
-  }
-end
-
 local rotatehack = false;
 local brushes = {}
 local brushtypes = {

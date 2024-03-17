@@ -7,7 +7,6 @@
 
 require 'util'
 local DB = require 'db'
-local proplist = require 'db.proplist'
 
 flags.register('help', 'h', '?') {
   help = 'display this text';

@@ -2,6 +2,7 @@
 require 'util'
 local DB = require 'db'
 local mapgen = require 'mapgen'
+local html_mode = os.getenv('MISMAP_MODE') == 'html'
 
 flags.register('help', 'h', '?') {
   help = 'display this text';
@@ -17,18 +18,45 @@ flags.register('proplist') {
   type = flags.string;
 }
 
-flags.register('mapgen') {
-  help = 'generate HTML map viewer and immediately exit';
-}
+if html_mode then
+  flags.registered.gamesys.required = true
+  flags.registered.proplist.required = true
 
-flags.register('genimages') {
-  help = 'generate terrain images. This is very expensive so if the terrain hasn\'t changed consider turning it off.';
-  default = true;
-}
+  flags.register('genimages') {
+    help = 'generate terrain images. This is very expensive so if the terrain hasn\'t changed consider turning it off.';
+    default = true;
+  }
+
+  flags.register('renderscale') {
+    help = 'Scale the HTML map to this value';
+    type = flags.number;
+    default = 4.0;
+  }
+
+  flags.register('html-in') {
+    help = 'Path to the static and template files used to generate the HTML maps.';
+    type = flags.string;
+    required = true;
+  }
+
+  flags.register('html-out') {
+    help = 'Directory to write HTML maps to. It must already exist.';
+    type = flags.string;
+    required = true;
+  }
+
+  -- currently disabled, may be reinstated later
+  -- flags.register('rotatehack') {
+  --   help = 'Rotate the view of the map so it matches up with the in-game compass and automap rather than with ShockEd'
+  -- }
+
+end
+
 
 local function main(...)
-  local args = flags.parse {...}
-  if args.help or #args < 1 then
+  local result,args = pcall(flags.parse, {...})
+  if not result or args.help or #args < 1 then
+    if not result then print(args..'\n') end
     print('Usage: mismap [flags] [--gamesys=shock.gam] [--proplist=proplist.txt] map.mis')
     print(flags.help())
     os.exit(1)
@@ -46,6 +74,8 @@ local function main(...)
   if args.gamesys then
     print('GAMESYS', args.gamesys)
     db:load(args.gamesys)
+  else
+    print('WARNING: no --gamesys specified, archetype data will be unavailable')
   end
 
   local maps = {}
@@ -56,7 +86,7 @@ local function main(...)
     maps[i].name = mis
   end
 
-  if args.mapgen then
+  if html_mode then
     mapgen(maps)
     os.exit(0)
   end

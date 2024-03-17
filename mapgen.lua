@@ -92,7 +92,7 @@ local function drawObjects(db)
 end
 
 local function mkMap(js, db, idx, name)
-  local out = 'www'
+  local output = flags.parsed.html_out
   local map = { level = idx; name = name; }
 
   local objMap,objInfo = drawObjects(db)
@@ -113,19 +113,19 @@ local function mkMap(js, db, idx, name)
     WALLS = table.concat(objMap, '\n    ');
     LEVEL_TITLE = map.name;
   }
-  io.writefile(out .. "/" .. idx .. ".js", js:interpolate(data))
+  io.writefile(output .. "/" .. idx .. ".js", js:interpolate(data))
 
   if flags.parsed.genimages then
-    render.drawToFile(out .. '/' .. idx .. '.png')
+    render.drawToFile(output .. '/' .. idx .. '.png')
   end
 
   return map
 end
 
 local function mkViewer(html, index)
-  local out = 'www'
+  local output = flags.parsed.html_out
   print('HTML', 'map.html')
-  io.writefile(out .. "/" .. 'map.html', html:interpolate {
+  io.writefile(output .. "/" .. 'map.html', html:interpolate {
     DEFAULT_LEVEL = index[1].level;
     ALL_LEVELS = table.concat(table.mapv(index, function(map) return "%d: true" % map.level end), ",");
     LEVEL_SELECT = table.concat(
@@ -139,14 +139,16 @@ local function mkViewer(html, index)
 end
 
 local function mkMaps(maplist)
-  local prefix = 'res'
-  print("Loading templates from %s/template.{html,js}..." % prefix)
-  local html = io.readfile("%s/template.html" % prefix)
-  local js = io.readfile("%s/template.js" % prefix)
+  local input = flags.parsed.html_in
+  local output = flags.parsed.html_out
+
+  print("Loading templates from %s/template.{html,js}..." % input)
+  local html = io.readfile("%s/template.html" % input)
+  local js = io.readfile("%s/template.js" % input)
 
   for _,file in ipairs { 'init.js', 'categories.js', 'kinetic.js', 'loading.png', 'render.js', 'ui.js' } do
     print('STATIC', file)
-    io.writefile('www/'..file, io.readfile('res/'..file))
+    io.writefile(input..'/'..file, io.readfile(output..'/'..file))
   end
 
   local index = {}
