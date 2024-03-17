@@ -287,8 +287,8 @@ local function drawObjects(brushes)
     if isDoor(obj) then
       -- TODO: this should use the PhysDims property on the object, once we
       -- know how to read it accurately.
-      love.graphics.setColor(0, 0, 0, 1)
-      drawBrush('fill', brush)
+      -- love.graphics.setColor(0, 0, 0, 1)
+      -- drawBrush('fill', brush)
       love.graphics.setColor(1, 1, 0, 1)
       drawBrush('line', brush)
     end
