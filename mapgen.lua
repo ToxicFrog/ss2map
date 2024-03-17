@@ -148,7 +148,7 @@ local function mkMaps(maplist)
 
   for _,file in ipairs { 'init.js', 'categories.js', 'kinetic.js', 'loading.png', 'render.js', 'ui.js' } do
     print('STATIC', file)
-    io.writefile(input..'/'..file, io.readfile(output..'/'..file))
+    io.writefile(output..'/'..file, io.readfile(input..'/'..file))
   end
 
   local index = {}
