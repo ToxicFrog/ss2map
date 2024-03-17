@@ -59,11 +59,16 @@ Make sure you're using the right one!
 ### Mission files (*.mis)
 
 These contain the actual map data. Unfortunately the MIS files that come with the
-games have brush data -- which is necessary to actually render anything -- stripped
-to save space. If you are using the fan patches (TFix, T2Fix, or Shock Community
-Patch), those also restore the brushes, and you're good to go. If you need to
-render the original versions of the levels, first open them in DromEd/ShockEd and
-use the `Extra -> Reconstruct Stripped -> Room Brushes` command, then save the result.
+games have some data removed to save space (known as "stripping"). If you're using
+the latest fan-patches you probably don't need to worry about this:
+
+- **Thief 1/Gold:** [TFix](https://www.ttlg.com/forums/showthread.php?t=134733) includes unstripped missions.
+- **Thief 2:** the "with mods" version of [T2Fix](https://www.ttlg.com/forums/showthread.php?t=149669) includes unstripped missions; you can also install [AM16's Fixes](https://www.ttlg.com/forums/showthread.php?t=141121) separately if you don't want the other T2Fix mods.
+- **System Shock 2:** the [Shock Community Patch](https://www.systemshock.org/index.php?topic=7116.0) includes unstripped missions.
+
+If you need to work with stripped levels, you can restore the stripped data by
+opening them up in a recent version of ShockEd or DromEd and using the
+`Extra -> Reconstruct Stripped -> Room Brushes` command.
 
 ## Included Tools
 
