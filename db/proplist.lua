@@ -40,6 +40,7 @@
 -- with the comment listing the name of each bit, presumably LSB first.
 
 local vstruct = require 'vstruct'
+local ptypes = require 'proptypes'
 local proplist = {}
 proplist.__index = proplist
 
@@ -73,6 +74,14 @@ end
 
 local function parseBody(self, body)
   local buf = {}
+  local ptype = ptypes[self.ctype]
+  if ptype then
+    self.format = ptype.format
+    self.pprint = ptype.pprint
+    self.dtype = self.ctype
+    return
+  end
+
   for name,type,tail in body:gmatch('"(.-)"%s*:%s*(%S+)(.-)\n') do
     table.insert(buf, {
       key = name;
@@ -149,10 +158,12 @@ end
 function printer.uint_hex(val)
   return '%x' % val
 end
-function printer.unknown(val) return '[unknown: %d bytes]' % #val end
+function printer.unknown(val)
+  return 'Unknown: '..(val:gsub(".", function(c) return ("%02X "):format(c:byte()) end):sub(1,-2))
+end
 function printer.default(val) return tostring(val) end
 
-local function pprint(self)
+local function generic_pprint(self)
   if printer[self.dtype] then
     return printer[self.dtype](self.value)
   else
@@ -167,7 +178,7 @@ function proplist:read(name, buf)
       name = '[unknown %s]' % name;
       key = name; key_full = name..'?';
       value = buf;
-      pprint = pprint;
+      pprint = generic_pprint;
       dtype = 'unknown';
     }
   elseif not propdef.format then
@@ -175,7 +186,7 @@ function proplist:read(name, buf)
       name = propdef.name;
       key = propdef.key; key_full = propdef.key_full;
       value = buf;
-      pprint = pprint;
+      pprint = generic_pprint;
       dtype = 'unknown';
     }
   end
@@ -187,8 +198,8 @@ function proplist:read(name, buf)
   return {
     name = propdef.name;
     key = propdef.key; key_full = propdef.key_full;
-    value = table.unpack(propdef.format:read(buf));
-    pprint = pprint;
+    value = value;
+    pprint = propdef.pprint or generic_pprint;
     dtype = propdef.dtype;
   }
 end

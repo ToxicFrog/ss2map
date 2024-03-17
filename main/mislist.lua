@@ -91,7 +91,7 @@ local function loadDB(args)
 end
 
 local function printObj(db, obj, pos, rot)
-  printf('%s @ (%.2f,%.2f,%.2f) ϴ° (H:%d P:%d B:%d)\n',
+  printf('%s @ (%.2f,%.2f,%.2f) ϴ (H:%d° P:%d° B:%d°)\n',
     tostring(obj),
     pos.x, pos.y, pos.z,
     rot.z * 180, rot.y * 180, rot.x * 180)
