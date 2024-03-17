@@ -72,6 +72,9 @@ local function init(db)
   -- rotatehack = mis.chunks.MAPPARAM.rotatehack
   rotatehack = false
   brushes = {}
+  for _,type in pairs(brushtypes) do
+    brushes[type] = {}
+  end
 
   -- Group brushes based on what we need in the different rendering passes
   for _,brush in db:objects('brush') do
@@ -267,9 +270,12 @@ local function drawWalls(brushes)
   end
 end
 
--- Stencil out fully solid regions of the level.
-local function drawStencils(brushes)
-  -- someday, do this using the air brushes
+local function isDoor(obj)
+  if not obj then return false end
+  local fqtn = obj:getFQTN() or ""
+  return obj:getProperty('TransDoor') ~= nil
+    or obj:getProperty('RotDoor') ~= nil
+    or fqtn:match('/Door')
 end
 
 local function drawObjects(brushes)
@@ -278,7 +284,7 @@ local function drawObjects(brushes)
     -- local x,y = world2screen(brush.position.x, brush.position.y)
     -- love.graphics.circle('fill', x, y, 1)
     local obj = getmetatable(brush).__db:object(brush.primal)
-    if obj:getProperty('TransDoor') then
+    if isDoor(obj) then
       -- TODO: this should use the PhysDims property on the object, once we
       -- know how to read it accurately.
       love.graphics.setColor(0, 0, 0, 1)
