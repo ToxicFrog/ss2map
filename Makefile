@@ -7,7 +7,7 @@ default: ss2
 all: ss2 t1 t2 zip
 
 deploy:
-	rsync -aPhv maps/ /mnt/net/funkyhorror.net/www/toxicfrog/maps/
+	rsync -aPhv maps/ funkyhorror:www/toxicfrog/maps/
 
 zip:
 	cd maps && rm -f t1-maps.zip t2-maps.zip ss2-maps.zip
