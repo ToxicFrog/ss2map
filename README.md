@@ -149,6 +149,23 @@ you use the order you want:
       --html-out www/maps \
       ss2/{earth,station,eng,medsci,hydro,ops,rec,command}*.mis
 
+#### Using the Map
+
+The center display shows the map. Circles are entities, lines and boxes are terrain.
+You can click and drag to pan, and use the mousewheel to zoom. Mousing over an entity
+will display its information in the lower right, and you can click to "lock" the
+information and keep it there even as you mouse over other things.
+
+The top left display lets you coarsely control which categories of entities are
+displayed on the map, which is useful if you are only interested in specific things.
+
+The top right lets you search. You can search by object name (e.g. `20 nanites`),
+object ID (e.g. `144`), or slash-separated object type, e.g. `goodies/nanites`.
+The search is a case-insentive substring search and will list all objects in the
+level (or, with `Search All`, across all levels) matching it; they will also be
+marked on the map with stars. Mousing over an object in the list will hilight it
+on the map and display its object info in the lower left.
+
 ## Known Issues and Future Work
 
 - The terrain renderer currently assumes all terrain brushes are rectangular prisms. This works remarkably well but produces obviously wrong results in a few places. Support for cylinders, pyramids, offset pyramids, and spheres is needed.
