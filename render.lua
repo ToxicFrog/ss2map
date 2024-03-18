@@ -153,18 +153,17 @@ end
 
 local function prepare()
   local w,h = love.window.getMode()
+
   love.graphics.translate(w/2, h/2)
   love.graphics.scale(scale, scale)
   love.graphics.translate(tx, ty)
+  if rotatehack then
+    love.graphics.rotate(math.rad(180))
+  else
+    love.graphics.rotate(math.rad(90))
+  end
   love.graphics.scale(1, -1) -- invert Y since LGS uses southwest rather than northwest gravity
   love.graphics.setLineWidth(1/scale)
-  if flags.parsed.rotatehack then
-    if rotatehack then
-      love.graphics.rotate(math.rad(180))
-    else
-      love.graphics.rotate(math.rad(90))
-    end
-  end
 end
 
 -- Get the lowest (x,y) value that could be overlapped by this brush.
