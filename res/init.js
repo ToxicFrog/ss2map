@@ -2,21 +2,11 @@ var search_results = []
 var maps = []
 var map
 
+for (k in levels) maps[k] = true
 if (window.location.hash != "") {
-  var hash = window.location.hash.substr(1).split(",")
-  var first = parseInt(hash[0])
+  var hash = window.location.hash.substr(1).split(",")[0]
+  var first = parseInt(hash)
   DEFAULT = isNaN(first) ? DEFAULT : first
-  for (var i=0; i < hash.length; ++i) {
-    if (hash[i] == '*') {
-      for (k in levels) maps[k] = true
-      break
-    }
-    maps[hash[i]] = levels[hash[i]]
-  }
-} else {
-  for (k in levels) {
-    maps[k] = true
-  }
 }
 
 /* Load the map data for the selected levels. */

@@ -54,7 +54,9 @@ function objectInfo(id) {
 }
 
 function changeLevel() {
-  showMap(document.getElementById("levelselect").value)
+  let level = document.getElementById("levelselect").value
+  window.location.hash = level
+  showMap(level)
 }
 
 function changeTerrainType() {
