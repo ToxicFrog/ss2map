@@ -158,6 +158,7 @@ function updateLayers() {
   for (var i=0; i < controls.length; ++i) {
     map.objLayers[i].setVisible(controls[i].checked);
   }
+  map.stage.draw();
 }
 
 function showAllLayers(visible) {
