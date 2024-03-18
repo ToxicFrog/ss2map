@@ -91,7 +91,7 @@ function initCategories() {
     let cat = CATEGORIES[i]
     cat.index = i
     rows.push('<label title="'
-      + cat.description
+      + cat.types.join('\n')
       + '"><input type="checkbox"'
       + (cat.show ? ' checked' : '')
       + ' onchange="updateLayers();"/>'
