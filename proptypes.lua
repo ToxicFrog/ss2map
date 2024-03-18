@@ -4,18 +4,114 @@
 local vstruct = require 'vstruct'
 local ptypes = {}
 
+local function mktype(name, format, pprint)
+  if type(pprint) == 'string' then
+    local pprint_fmt = pprint
+    pprint = function(self, value)
+      return pprint_fmt:format(value)
+    end
+  end
+  ptypes[name] = {
+    format = format;
+    pprint = pprint;
+  }
+end
+
+-- Define all the basic types.
+mktype('bool', 'b4', function(self, value) return tostring(value) end)
+
+--mktype('sfloat', 'f2', '%f') -- TODO: 16-bit floats
+mktype('float', 'f4', '%f')
+
+mktype('short', 'i2', '%d')
+mktype('int', 'i4', '%d')
+mktype('int_hex', 'i4', '%x')
+
+mktype('ushort', 'u2', '%u')
+mktype('uint', 'u4', '%u')
+mktype('uint_hex', 'u4', '%x')
+
+-- Strings may need more work. They generally seem to be c4 null-terminated but
+-- I don't know if that's universally true.
+mktype('string', 'x4 z', '%s')
+
+mktype('ang', 'p2,15', function(self, value) return '%d°' % (value*180) end)
+mktype('rgb', '{ r:u1 g:u1 b:u1 }', function(self, value)
+  return '#%02X%02X%02X' % { value.r, value.g, value.b }
+end)
+mktype('vector', '{ x:f4 y:f4 z:f4 }', function(self, value)
+  return '(%.2f, %.2f, %.2f)' % { value.x, value.y, value.z }
+end)
+
+-- TODO
+mktype('bitflags', 'u4', function(self, value) return '[bitfield: %08X]' % value end)
+-- ptypes.bitflags = {
+--   format = 'u4';
+--   pprint = function(self, value)
+--     table.print(self)
+--     return self.enum[value] or '[enum: %d]' % value
+--   end;
+--   parse_tail = function(field, tail)
+--     field.enum = {}
+--     local i = 0
+--     for name in (tail..','):gmatch('"(.-)",') do
+--       field.enum[i] = name
+--       i = i+1
+--     end
+--   end;
+-- }
+
+ptypes.enum = {
+  format = 'u4';
+  pprint = function(self, value)
+    return self.enum[value] or '[enum: %d]' % value
+  end;
+  parseTail = function(field, tail)
+    field.enum = {}
+    local i = 0
+    for name in (tail..','):gmatch('"(.-)",') do
+      field.enum[i] = name
+      i = i+1
+    end
+  end;
+}
+
+--[[
+  someday I want to be able to write this as:
+  ptypes.Position = aggregate {
+    field 'pos' 'vector';
+    padding(4);
+    field 'rot' 'angvec';
+  }
+  and have pprint et al work automatically
+]]
+
 ptypes.Position = {
   format = 'pos:{ x:f4 y:f4 z:f4 } x4 rot:{ x:pu2,15 y:pu2,15 z:pu2,15 }';
-  pprint = function(self)
-    local val = self.value
+  read = function(self, data)
+    return vstruct.read('pos:{ x:f4 y:f4 z:f4 } x4 rot:{ x:pu2,15 y:pu2,15 z:pu2,15 }', data)
+  end;
+  pprint = function(self, value)
     return '(%.2f,%.2f,%.2f) ϴ (H:%d° P:%d° B:%d°)' %{
-      val.pos.x, val.pos.y, val.pos.z, val.rot.z*180, val.rot.y*180, val.rot.x*180
+      value.pos.x, value.pos.y, value.pos.z, value.rot.z*180, value.rot.y*180, value.rot.x*180
     }
   end;
 }
 
+ptypes.unknown = {
+  format = '';
+  read = function(self, data) return data end;
+  pprint = function(self, value)
+    return (value:gsub(".", function(c) return ("%02X "):format(c:byte()) end):sub(1,-2))
+  end;
+}
+
 for k,v in pairs(ptypes) do
-  v.format = vstruct.compile(v.format)
+  local struct = vstruct.compile(v.format)
+  v.parseTail = v.parseTail or function() end
+  v.read = v.read or function(self, data)
+    return table.unpack(struct:read(data))
+  end
   -- autopromote string-only pprints to wrappers around string.interpolate?
 end
 

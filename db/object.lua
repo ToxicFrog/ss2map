@@ -7,6 +7,7 @@
 -- dereferencing, MetaProp-aware property reading, and whatnot.
 
 local object = {}
+local proplist = require 'db.proplist'
 
 function object:__tostring()
   return string.format('%s (%d)', self:getName(), self.meta.id)
@@ -79,7 +80,7 @@ function object:getProperty(name, inherit)
   if inherit == nil then inherit = true end
 
   if self.meta.props[name] then
-    return self.meta.props[name]
+    return proplist.wrap(self.meta.props[name])
   elseif inherit then
     for link in self:getLinks('MetaProp') do
       local prop = link:deref():getProperty(name, true)
@@ -100,7 +101,7 @@ function object:getProperties(inherit)
   return coroutine.wrap(function()
     for k,v in pairs(self.meta.props) do
       seen[k] = true
-      coroutine.yield(v)
+      coroutine.yield(proplist.wrap(v))
     end
     if not inherit then return end
     for link in self:getLinks('MetaProp') do
