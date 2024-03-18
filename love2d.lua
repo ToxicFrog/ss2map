@@ -2,6 +2,7 @@ local render = require 'render'
 
 local maps = nil
 local map_index = 1
+local draw_interiors = false
 
 local function hotReload()
   package.loaded.render = nil
@@ -19,6 +20,7 @@ function love.keypressed(key)
   elseif key == 'w' then render.zoom(1/8)
   elseif key == 's' then render.zoom(-1/8)
   elseif key == 'q' then love.event.push('quit')
+  elseif key == 'i' then draw_interiors = not draw_interiors
   elseif key == 'r' then
     print('Hot-reloading renderer...')
     local result,err = pcall(hotReload)
@@ -45,7 +47,7 @@ function love.mousemoved(x, y, dx, dy)
 end
 
 function love.draw()
-  render.draw()
+  render.draw(draw_interiors)
 end
 
 return function(maplist)
