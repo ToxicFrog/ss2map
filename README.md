@@ -166,6 +166,10 @@ level (or, with `Search All`, across all levels) matching it; they will also be
 marked on the map with stars. Mousing over an object in the list will hilight it
 on the map and display its object info in the lower left.
 
+Searches will also return all containers that contain the searched-for object, so
+if you search for (e.g.) `audio log`, you will also see crates, corpses, etc in
+the search results -- mouse over them to view their contents.
+
 ## Known Issues and Future Work
 
 - The terrain renderer currently assumes all terrain brushes are rectangular prisms. This works remarkably well but produces obviously wrong results in a few places. Support for cylinders, pyramids, offset pyramids, and spheres is needed.
