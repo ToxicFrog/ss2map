@@ -38,21 +38,15 @@ local function objectinfo(db, brush)
     _props = {};
   }
 
+  -- High-level information and containing brush data
   addinfo(buf, "name", tostring(obj))
   -- replace ' ' with nonbreaking space, then make it breakable around slashes
-  addinfo(buf, "type", fqtn:gsub(' ', ' '):gsub('/', ' » '))
+  addinfo(buf, "type", fqtn) --fqtn:gsub(' ', ' '):gsub('/', ' » '))
   addinfo(buf, 'brush id', '%d' % brush.meta.id)
   addinfo(buf, "brush xyz", '(%.2f, %.2f, %.2f)' % { pos.x, pos.y, pos.z })
   addinfo(buf, "brush ϴ", 'H:%d° P:%d° B:%d°' % { rot.z*180, rot.x*180, rot.y*180 })
-  for prop in obj:getProperties(false) do
-    local info = prop:pprint()
-    if info:match('^Unknown: ') then
-      -- strip 'unknown' prefix and truncate to 24 bytes
-      info = info:sub(10,81)
-    end
-    addinfo(buf, prop.key_full, info)
-  end
 
+  -- Contents, for containers
   local contents,contentnames = {},{}
   for link in obj:getLinks('Contains') do
     table.insert(contents, tostring(link.dst))
@@ -66,11 +60,25 @@ local function objectinfo(db, brush)
     addinfo(buf, "contents", contentnames)
   end
 
+  -- Generic properties
+  local buf_generic = { _props = {} }
+  for prop in obj:getProperties(false) do
+    local info = prop:pprint()
+    if info:match('^Unknown: ') then
+      -- strip 'unknown' prefix and truncate to 24 bytes
+      info = info:sub(10,81)
+    end
+    addinfo(buf_generic, prop.key_full, info)
+  end
+  table.sort(buf_generic._props)
+
   return obj,
-    '"%d": {%s, _props: [%s] }' % {
+    '"%d": {%s, %s, _props: [%s, %s] }' % {
       oid,
       table.concat(buf, ','),
-      table.concat(buf._props, ',')
+      table.concat(buf_generic, ','),
+      table.concat(buf._props, ','),
+      table.concat(buf_generic._props, ',')
     }
 end
 
