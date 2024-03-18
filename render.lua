@@ -331,7 +331,7 @@ local function drawBadBrushes(brushes, ...)
   return drawBadBrushes(...)
 end
 
-local function draw()
+local function draw(draw_interiors)
   love.graphics.push()
   if love.graphics.getCanvas() then
     prepareCanvas()
@@ -339,12 +339,30 @@ local function draw()
     prepare()
   end
   drawAir(brushes.air)
-  drawDecorations(brushes.decor)
-  drawWalls(brushes.walls)
-  drawObjects(brushes.objects)
+  if draw_interiors then
+    drawDecorations(brushes.decor)
+    drawWalls(brushes.walls)
+    drawObjects(brushes.objects)
   -- drawUnknown(brushes.other)
-  drawBadBrushes(brushes.air, brushes.walls, brushes.decor)
+    drawBadBrushes(brushes.air, brushes.walls, brushes.decor)
+  end
   love.graphics.pop()
+end
+
+local function drawToCanvas(canvas, draw_interiors)
+  love.graphics.setCanvas {
+    canvas;
+    stencil = true, depth = false;
+  }
+  love.graphics.setColor(0,0,0,1)
+  love.graphics.clear()
+  draw(draw_interiors)
+  love.graphics.setCanvas()
+end
+
+local function saveCanvas(canvas, filename)
+  print('PNG', filename)
+  io.writefile(filename, canvas:newImageData():encode('png'):getString())
 end
 
 local function drawToFile(filename)
@@ -356,14 +374,10 @@ local function drawToFile(filename)
   love.graphics.present()
   local renderscale = flags.parsed.renderscale
   local canvas = love.graphics.newCanvas(w*renderscale+1, h*renderscale+1)
-  love.graphics.setCanvas {
-    canvas;
-    stencil = true, depth = false;
-  }
-  draw()
-  love.graphics.setCanvas()
-  print('PNG', filename)
-  io.writefile(filename, canvas:newImageData():encode('png'):getString())
+  drawToCanvas(canvas, false)
+  saveCanvas(canvas, filename..'.outline.png')
+  drawToCanvas(canvas, true)
+  saveCanvas(canvas, filename..'.detail.png')
 end
 
 return {

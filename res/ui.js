@@ -57,6 +57,13 @@ function changeLevel() {
   showMap(document.getElementById("levelselect").value)
 }
 
+function changeTerrainType() {
+  let ttype = document.getElementById("terraintype").value;
+  console.log('change terrain type:', ttype)
+  map.bgimage.src = map.index + '.' + ttype + '.png';
+  map.stage.draw();
+}
+
 function showMap(i) {
   if (maps[i] && i != map.index) {
     clearChildren(document.getElementById('map'))
@@ -83,7 +90,7 @@ function loadBackground(map) {
     map.mapLayer.add(terrain);
     map.mapLayer.draw();
   }
-  map.bgimage.src = map.index+'.png';
+  changeTerrainType();
 }
 
 function initMap() {
