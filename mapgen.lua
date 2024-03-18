@@ -40,6 +40,12 @@ local function objectinfo(db, brush)
 
   -- High-level information and containing brush data
   addinfo(buf, "name", tostring(obj))
+  if obj:getShortDesc() then
+    addinfo(buf, "short desc", obj:getShortDesc())
+  end
+  if obj:getFullDesc() then
+    addinfo(buf, "full desc", obj:getFullDesc())
+  end
   -- replace ' ' with nonbreaking space, then make it breakable around slashes
   addinfo(buf, "type", fqtn) --fqtn:gsub(' ', ' '):gsub('/', ' » '))
   addinfo(buf, 'brush id', '%d' % brush.meta.id)

@@ -27,9 +27,25 @@ end
 -- - the SymName property
 -- if none of these are available it falls back to the object type.
 function object:getName()
+  local sym_name = self:getProperty('SymName')
   return self.name
-    or self:getProperty('SymName'):pprint()
+    or sym_name and sym_name:pprint()
     or '[anonymous %s]' % self.meta.type
+end
+
+local function parseDescription(prop)
+  -- prop is either going to be a munged version of SymName, in which case
+  -- we don't care at all, or it's going to be something of the form
+  -- 'localization_key: "item description"'. We want the latter.
+  if not prop then return end
+  return prop:pprint():match('^.-: "(.*)"$')
+end
+
+function object:getShortDesc()
+  return parseDescription(self:getProperty('ObjShort'))
+end
+function object:getFullDesc()
+  return parseDescription(self:getProperty('ObjName'))
 end
 
 -- Get the "fully qualified typename" of the object. This is a slash-separated
