@@ -96,7 +96,6 @@ end
 -- File should be the str filename without path or extension, e.g.
 -- db:string('objshort', 'BigBomb') => 'Sympathetic Resonator'
 function db:string(file, key)
-  print('getstr', file, key, self._strings[file])
   return self._strings[file] and self._strings[file][key]
 end
 
