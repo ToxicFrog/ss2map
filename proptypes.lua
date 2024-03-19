@@ -43,23 +43,27 @@ mktype('vector', '{ x:f4 y:f4 z:f4 }', function(self, value)
   return '(%.2f, %.2f, %.2f)' % { value.x, value.y, value.z }
 end)
 
--- TODO
-mktype('bitflags', 'u4', function(self, value) return '[bitfield: %08X]' % value end)
--- ptypes.bitflags = {
---   format = 'u4';
---   pprint = function(self, value)
---     table.print(self)
---     return self.enum[value] or '[enum: %d]' % value
---   end;
---   parse_tail = function(field, tail)
---     field.enum = {}
---     local i = 0
---     for name in (tail..','):gmatch('"(.-)",') do
---       field.enum[i] = name
---       i = i+1
---     end
---   end;
--- }
+ptypes.bitflags = {
+  format = 'u4';
+  read = function(self, data)
+    return vstruct.explode(self.struct:read(data)[1])
+  end;
+  pprint = function(self, value)
+    local buf = {}
+    for i,bit in ipairs(value) do
+      if bit then
+        table.insert(buf, self.bits[i] or '[%d]' % i)
+      end
+    end
+    return table.concat(buf, ' | ')
+  end;
+  parseTail = function(field, tail)
+    field.bits = {}
+    for name in (tail..','):gmatch('"(.-)",') do
+      table.insert(field.bits, name)
+    end
+  end;
+}
 
 ptypes.enum = {
   format = 'u4';
