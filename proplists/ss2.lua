@@ -19,4 +19,12 @@ ptypes.sKeyInfo = {
   end
 }
 
+ptypes.cPhysDimsProp = {
+  -- TODO: all the rest of the fields
+  format = '{ x32 x:f4 y:f4 z:f4 x8 }';
+  pprint = function(self, value)
+    return '%dx%dx%d' % { value.x, value.y, value.z }
+  end;
+}
+
 return ptypes

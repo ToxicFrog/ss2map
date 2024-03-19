@@ -121,13 +121,6 @@ ptypes.sLogData = {
   end;
 }
 
-ptypes.cPhysDimsProp = {
-  format = '{ x32 x:f4 y:f4 z:f4 x8 }';
-  pprint = function(self, value)
-    return '%dx%dx%d' % { value.x, value.y, value.z }
-  end;
-}
-
 ptypes.unknown = {
   format = '';
   read = function(self, data) return data end;
