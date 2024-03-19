@@ -113,6 +113,8 @@ local function listObjs(db, args)
     -- Skip everything that isn't an object placement brush.
     if brush.type ~= -3 then goto continue end
     local obj = db:object(brush.primal)
+    -- Thief maps sometimes have brushes pointing to nonexistent objects??
+    if not obj then goto continue end
     printObj(db, obj, brush.position, brush.rotation)
 
     if args.ancestry then
