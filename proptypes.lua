@@ -17,6 +17,10 @@ local function mktype(name, format, pprint)
   }
 end
 
+local function readNoUnpack(self, data)
+  return self.struct:read(data)
+end
+
 -- Define all the basic types.
 mktype('bool', 'b4', function(self, value) return tostring(value) end)
 
@@ -44,10 +48,7 @@ mktype('vector', '{ x:f4 y:f4 z:f4 }', function(self, value)
 end)
 
 ptypes.bitflags = {
-  format = 'u4';
-  read = function(self, data)
-    return vstruct.explode(self.struct:read(data)[1])
-  end;
+  format = 'm4';
   pprint = function(self, value)
     local buf = {}
     for i,bit in ipairs(value) do
@@ -92,13 +93,25 @@ ptypes.enum = {
 
 ptypes.Position = {
   format = 'pos:{ x:f4 y:f4 z:f4 } x4 rot:{ x:pu2,15 y:pu2,15 z:pu2,15 }';
-  read = function(self, data)
-    return self.struct:read(data)
-  end;
+  read = readNoUnpack;
   pprint = function(self, value)
     return '(%.2f,%.2f,%.2f) ϴ (H:%d° P:%d° B:%d°)' %{
       value.pos.x, value.pos.y, value.pos.z, value.rot.z*180, value.rot.y*180, value.rot.x*180
     }
+  end;
+}
+
+ptypes.sLogData = {
+  format = 'emails:m4 logs:m4 notes:m4 vids:m4';
+  read = readNoUnpack;
+  pprint = function(self, value)
+    local buf = {}
+    for type,bits in pairs(value) do
+      for i,bit in ipairs(bits) do
+        if bit then table.insert(buf, '%s:%d' % {type, i}) end
+      end
+    end
+    return table.concat(buf, ' ')
   end;
 }
 
