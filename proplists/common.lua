@@ -17,7 +17,7 @@ local function mktype(name, format, pprint)
   }
 end
 
-local function readNoUnpack(self, data)
+function ptypes._readNoUnpack(self, data)
   return self.struct:read(data)
 end
 
@@ -92,8 +92,7 @@ ptypes.enum = {
 ]]
 
 ptypes.Position = {
-  format = 'pos:{ x:f4 y:f4 z:f4 } x4 rot:{ x:pu2,15 y:pu2,15 z:pu2,15 }';
-  read = readNoUnpack;
+  format = '{ pos:{ x:f4 y:f4 z:f4 } x4 rot:{ x:pu2,15 y:pu2,15 z:pu2,15 } }';
   pprint = function(self, value)
     return '(%.2f,%.2f,%.2f) ϴ (H:%d° P:%d° B:%d°)' %{
       value.pos.x, value.pos.y, value.pos.z, value.rot.z*180, value.rot.y*180, value.rot.x*180
@@ -102,8 +101,7 @@ ptypes.Position = {
 }
 
 ptypes.sLogData = {
-  format = 'Email:m4 Log:m4 Note:m4 Vid:m4';
-  read = readNoUnpack;
+  format = '{ Email:m4 Log:m4 Note:m4 Vid:m4 }';
   pprint = function(self, value, propdef, db)
     local buf = {}
     local strs = 'level%02d' % tonumber(propdef.key:match('%d+$'))
@@ -119,32 +117,8 @@ ptypes.sLogData = {
         end
       end
     end
-    return table.concat(buf, ';')
+    return table.concat(buf, '; ')
   end;
-}
-
--- ptypes.sKeyDst = aggregate {
---   field 'master' { format = 'b1'; pprint = ...; };
---   field 'regions' { }
--- }
-
-ptypes.sKeyInfo = {
-  format = 'master:b1 regions:m4 lock:u1';
-  read = readNoUnpack;
-  parseTail = function(self, name, type, tail)
-    if name == 'RegionID' then
-      ptypes.bitflags.parseTail(self, name, type, tail)
-    end
-  end;
-  pprint = function(self, value, propdef, db)
-    local buf = {}
-    table.insert(buf, (ptypes.bitflags.pprint(self, value.regions, propdef, db):gsub(' | ', '/')))
-    table.insert(buf, '#%d' % value.lock)
-    if value.master then
-      table.insert(buf, '(MASTER KEY)')
-    end
-    return table.concat(buf, ' ')
-  end
 }
 
 ptypes.unknown = {
@@ -155,19 +129,24 @@ ptypes.unknown = {
   end;
 }
 
-for k,v in pairs(ptypes) do
-  v.struct = v.struct or vstruct.compile(v.format)
-  v.parseTail = v.parseTail or function() end
-  v.read = v.read or function(self, data)
-    return table.unpack(v.struct:read(data))
+function ptypes._finalize()
+  for k,v in pairs(ptypes) do
+    if k:sub(1,1) == '_' then goto continue end
+    v.struct = v.struct or vstruct.compile(v.format)
+    v.parseTail = v.parseTail or function() end
+    v.read = v.read or function(self, data)
+      return table.unpack(v.struct:read(data))
+    end
+    v.clone = function(self)
+      -- Copy struct over by hand to preserve its metatable
+      local other = { struct = self.struct; }
+      table.merge(other, self, 'ignore')
+      return other
+    end;
+    -- TODO: autopromote string-only pprints to wrappers around string.interpolate?
+    ::continue::
   end
-  v.clone = function(self)
-    -- Copy struct over by hand to preserve its metatable
-    local other = { struct = self.struct; }
-    table.merge(other, self, 'ignore')
-    return other
-  end;
-  -- TODO: autopromote string-only pprints to wrappers around string.interpolate?
+  return ptypes
 end
 
 return ptypes

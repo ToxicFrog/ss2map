@@ -36,12 +36,18 @@ in Love2d's graphics subsystem, `mishtml` cannot operate headless, sorry.
 
 In order to deserialize and display object properties, the programs require a
 `proplist.txt` file, which lists all of the properties supported by the Dark
-Engine and their corresponding types. For convenience, the repo includes three
-proplist files: `proplist.ss2` for System Shock 2 v2.48, `proplist.t1` for Thief
-Gold v1.26, and `proplist.t2` for Thief 2 v1.25, which are (as of this writing)
-the latest versions on GOG.
+Engine and their corresponding types. For convenience, these are built in; you
+can find them in the `proplists` directory:
 
-If you need a different one, you can generate it yourself:
+- `ss2.proplist`: System Shock 2 v2.48
+- `t1.proplist`: Thief Gold v1.26
+- `t2.proplist`: Thief 2 v1.25
+
+The Lua files in that directory contain additional information about on-disk
+property layout not included in the `proplist.txt`.
+
+If you need to add support for another engine version, you can generate the
+`proplist.txt` yourself:
 
 - make sure your `user.bnd` file contains the line `bind : edit_command`
 - start the game

@@ -57,12 +57,17 @@
 ]]
 -- with the comment listing the name of each bit, presumably LSB first.
 
-local ptypes = require 'proptypes'
+local ptypes
 local proplist = {}
 proplist.__index = proplist
 
+function proplist.load(format)
+  ptypes = require('proplists.'..format)._finalize()
+  return proplist.loadFile('proplists/'..format..'.proplist')
+end
+
 -- Load a proplist.txt from disk and return a plist object.
-function proplist.load(file)
+function proplist.loadFile(file)
   return proplist.parse(assert(io.open(file, 'rb')):read('*a'):gsub('\r\n', '\n'))
 end
 

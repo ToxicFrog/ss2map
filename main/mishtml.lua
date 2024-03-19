@@ -4,7 +4,6 @@ local DB = require 'db'
 local mapgen = require 'mapgen'
 
 flags.registered.gamesys.required = true
-flags.registered.proplist.required = true
 
 flags.register('genimages') {
   help = 'generate terrain images. This is very expensive so if the terrain hasn\'t changed consider turning it off.';
@@ -32,15 +31,15 @@ return function(...)
   local result,args = pcall(flags.parse, {...})
   if not result or args.help or #args < 1 then
     if not result then eprintf('%s\n', args) end
-    eprintf('Usage: mishtml --html-in=template/dir/ --gamesys=shock2.gam --proplist=proplist.txt [flags] map.mis [map2.mis...]\n')
+    eprintf('Usage: mishtml --html-in=template/dir/ --gamesys=shock2.gam [flags] map.mis [map2.mis...]\n')
     eprintf('%s\n', flags.help())
     os.exit(1)
   end
 
   local db = DB.new()
 
-  print('PROPS', args.proplist)
-  db:load_proplist(args.proplist)
+  print('PROPS', args.propformat)
+  db:load_proplist(args.propformat)
 
   if args.strings then
     print('STRINGS', args.strings)

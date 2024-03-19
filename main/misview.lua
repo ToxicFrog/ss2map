@@ -15,12 +15,8 @@ return function(...)
 
   local db = DB.new()
 
-  if args.proplist then
-    print('PROPS', args.proplist)
-    db:load_proplist(args.proplist)
-  else
-    print('WARNING: no --proplist specified, entity property data will be unavailable')
-  end
+  print('PROPS', args.propformat)
+  db:load_proplist(args.propformat)
 
   if args.gamesys then
     print('GAMESYS', args.gamesys)

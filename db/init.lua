@@ -74,8 +74,8 @@ function db:load(file)
   loader.load(self, file)
 end
 
-function db:load_proplist(file)
-  self._plist = proplist.load(file)
+function db:load_proplist(format)
+  self._plist = proplist.load(format)
 end
 
 function db:load_strings(file)

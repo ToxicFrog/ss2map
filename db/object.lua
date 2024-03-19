@@ -8,6 +8,7 @@
 
 local object = {}
 local proplist = require 'db.proplist'
+local objname = require 'db.objname'
 
 function object:__tostring()
   return string.format('%s (%d)', self:getName(), self.meta.id)
@@ -23,15 +24,15 @@ end
 
 -- Return the object's human-readable name.
 -- This is, in descending priority:
--- - (TODO) the name from strings/objshort.str
 -- - the name from OBJ_MAP
 -- - the SymName property
--- if none of these are available it falls back to the object type.
+-- - the object type
 function object:getName()
-  local sym_name = self:getProperty('SymName')
-  return self.name
-    or sym_name and sym_name:pprint()
-    or '[anonymous %s]' % self.meta.type
+  return objname.getName(self)
+end
+
+function object:getGenericName()
+  return objname.getNameGeneric(self)
 end
 
 local function parseDescription(prop)
@@ -42,9 +43,16 @@ local function parseDescription(prop)
   return prop:pprint():match('^.-: "(.*)"$')
 end
 
+-- Get the item's short description (the ObjShort field), if set to a useful
+-- value.
+-- TODO: use objshort.str if loaded.
 function object:getShortDesc()
   return parseDescription(self:getProperty('ObjShort'))
 end
+
+-- Get the item's long description (the ObjName field), if set to a useful
+-- value.
+-- TODO: use objname.str if loaded.
 function object:getFullDesc()
   return parseDescription(self:getProperty('ObjName'))
 end
@@ -55,10 +63,10 @@ end
 function object:getFQTN()
   local function aux(obj, ...)
     if obj.meta.id == -1 then -- Object archetype
-      return { obj:getName(), ... }
+      return { obj:getGenericName(), ... }
     end
     for link in obj:getLinks('MetaProp') do
-      local path = aux(link:deref(), obj:getName(), ...)
+      local path = aux(link:deref(), obj:getGenericName(), ...)
       if path then return path end
     end
   end
