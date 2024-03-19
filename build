@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+#
+# Settings
+
+SHOCK2=${SHOCK2:=ss2}
+THIEF1=${THIEF1:=t1}
+THIEF2=${THIEF2:=t2}
+
+SHOCK2_GAMESYS=${SHOCK2_GAMESYS:=shockscp.gam}
+THIEF1_GAMESYS=${THIEF1_GAMESYS:=dark.gam}
+THIEF2_GAMESYS=${THIEF2_GAMESYS:=dark.gam}
+
+# Implementation
+
+set -e
+
+function main {
+  for cmd in "$@"; do
+    echo "build/$cmd"
+    build/$cmd
+    shift
+  done
+}
+
+function build/clean {
+  git clean -fx maps/
+}
+
+function build/ss2 {
+	mkmaps ss2 $SHOCK2/$SHOCK2_GAMESYS $SHOCK2/{earth,station,eng,medsci,hydro,ops,rec,command,rick,many,shodan}*.mis
+}
+
+function build/t1 {
+  mkmaps t1 $THIEF1/$THIEF1_GAMESYS $THIEF1/miss{1..7}.mis t1/miss{9..17}.mis
+}
+
+function build/t2 {
+  mkmaps t2 $THIEF2/$THIEF2_GAMESYS $THIEF2/miss{1,2}.mis t2/miss{4..16}.mis
+}
+
+function build/test {
+  mkmaps $SHOCK2/{earth,eng2,medsci1,hydro1,many}.mis
+}
+
+function build/all {
+  build/clean
+  build/ss2
+  build/t1
+  build/t2
+  build/zip
+}
+
+function build/deploy {
+	rsync -aPhv maps/ funkyhorror:www/toxicfrog/maps/
+}
+
+function build/zip {
+	cd maps
+  rm -f t1-maps.zip t2-maps.zip ss2-maps.zip
+	zip -9 -r ss2-maps.zip ss2/
+	zip -9 -r t1-maps.zip t1/
+	zip -9 -r t2-maps.zip t2/
+}
+
+function mkmaps {
+  local game="$1"
+  local gamesys="$2"
+  shift 2
+
+  # FIXME: generalize strings
+  mkdir -p maps/$game
+  ./mishtml \
+    --propformat $game \
+    --gamesys $gamesys \
+    --strings ss2/strings \
+    --html-out maps/$game \
+    "$@" &
+
+  local i=0
+  for map in "$@"; do
+    printf 'LIST\t%s\n' "$map"
+    ./mislist \
+      --propformat $game \
+      --gamesys $gamesys \
+      --strings ss2/strings \
+      --props --ancestry --inherited --links \
+      "$map" > "maps/$game/${i}.txt"
+    ((++i))
+  done
+
+  wait
+}
+
+[[ $1 ]] || set -- all
+main "$@"
