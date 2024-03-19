@@ -129,6 +129,7 @@ local function listObjs(db, args)
 
     if args.props then
       local src = obj
+      printf('  Dimensions: %dx%dx%d\n', brush.size.x*2, brush.size.y*2, brush.size.z*2)
       print('  Properties:')
       for prop in obj:getProperties(args.inherited) do
         if prop.obj ~= src then
