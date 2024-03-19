@@ -65,8 +65,9 @@ function changeTerrainType() {
   map.stage.draw();
 }
 
-function showMap(i) {
+function showMap(i) {hash
   window.location.hash = i
+  document.getElementById("mislist_download").href = i + ".txt"
   if (maps[i] && i != map.index) {
     clearChildren(document.getElementById('map'))
     destroyMap()
@@ -155,6 +156,7 @@ function drawSearchResults() {
 }
 
 function destroyMap() {
+  if (!map.stage) return;
   map.stage.destroy()
   delete map.mapLayer
   delete map.objLayers

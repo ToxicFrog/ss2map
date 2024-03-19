@@ -30,12 +30,9 @@ window.addEventListener('load', function() {
   }
 
   initCategories()
-  clearChildren(document.getElementById('map'))
-  map = maps[DEFAULT]
-  initMap()
-  updateLayers()
-  document.getElementById("levelselect").value = map.index
-  document.title = map.title + " - System Shock 2 Map"
+
+  map = { index: -1 }
+  showMap(DEFAULT)
 
   installPanZoomHandlers(document.getElementById('mapcell'));
 }, false)
