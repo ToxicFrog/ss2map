@@ -37,6 +37,7 @@
 -- or db:pairs(type) to iterate over all objects of a given type.
 local loader = require 'db.loader'
 local proplist = require 'db.proplist'
+local strings = require 'db.strings'
 
 local db = {}
 db.__index = db
@@ -46,6 +47,10 @@ function db.new()
   local self = {
     -- map meta.type => meta.id => object
     _objects = {};
+    -- parsed property list and property deserializer/prettyprinter interface
+    _plist = nil;
+    -- string tables
+    _strings = {};
   }
   return setmetatable(self, db)
 end
@@ -56,6 +61,7 @@ end
 function db:clone()
   local clone = db.new()
   clone._plist = self._plist -- read-only, so safe to share
+  clone._strings = self._strings -- likewise
   -- in an ideal world individual objects would be readonly, but it turns out
   -- that, e.g., you can load archetype -1 from the gamesys and then rename it
   -- in the OBJ_MAP of earth.mis and now everything is horrible.
@@ -72,11 +78,26 @@ function db:load_proplist(file)
   self._plist = proplist.load(file)
 end
 
+function db:load_strings(file)
+  local name = file:match('([^/]+)%.str$')
+  assert(name, "unable to determine basename for string table "..file)
+  self._strings[name] = strings.load(file)
+end
+
 local function byType(db, type)
   if not db._objects[type] then
     db._objects[type] = {}
   end
   return db._objects[type]
+end
+
+-- Get a string from the localization database.
+-- If the file is not loaded or no such string exists in it, returns nil.
+-- File should be the str filename without path or extension, e.g.
+-- db:string('objshort', 'BigBomb') => 'Sympathetic Resonator'
+function db:string(file, key)
+  print('getstr', file, key, self._strings[file])
+  return self._strings[file] and self._strings[file][key]
 end
 
 -- Get a single object from the database. Throws if there is no object with the
