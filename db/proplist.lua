@@ -74,8 +74,13 @@ local function parseBody(propdef, body)
   local ptype = ptypes[propdef.ctype]
   if ptype then
     -- We have a proptype definition that covers this property in its entirety,
-    -- so just use that.
-    propdef.ptype = ptype
+    -- so just use that. Feed it all the field definitions so it can parse enums
+    -- and stuff.
+    -- TODO: we should rework this to use aggregate ptypes.
+    propdef.ptype = ptype:clone()
+    for name,type,tail in body:gmatch('"(.-)"%s*:%s*(%S+)(.-)\n') do
+      propdef.ptype:parseTail(name, type, tail)
+    end
     return
   end
 
@@ -98,7 +103,7 @@ local function parseBody(propdef, body)
 
     local field = ptype:clone()
     field.name = name;
-    field:parseTail(tail)
+    field:parseTail(name, type, tail)
     propdef.ptype = field
   end
 end

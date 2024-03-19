@@ -58,7 +58,7 @@ ptypes.bitflags = {
     end
     return table.concat(buf, ' | ')
   end;
-  parseTail = function(field, tail)
+  parseTail = function(field, name, type, tail)
     field.bits = {}
     for name in (tail..','):gmatch('"(.-)",') do
       table.insert(field.bits, name)
@@ -71,7 +71,7 @@ ptypes.enum = {
   pprint = function(self, value)
     return self.enum[value] or '[enum: %d]' % value
   end;
-  parseTail = function(field, tail)
+  parseTail = function(field, name, type, tail)
     field.enum = {}
     local i = 0
     for name in (tail..','):gmatch('"(.-)",') do
@@ -121,6 +121,30 @@ ptypes.sLogData = {
     end
     return table.concat(buf, ';')
   end;
+}
+
+-- ptypes.sKeyDst = aggregate {
+--   field 'master' { format = 'b1'; pprint = ...; };
+--   field 'regions' { }
+-- }
+
+ptypes.sKeyInfo = {
+  format = 'master:b1 regions:m4 lock:u1';
+  read = readNoUnpack;
+  parseTail = function(self, name, type, tail)
+    if name == 'RegionID' then
+      ptypes.bitflags.parseTail(self, name, type, tail)
+    end
+  end;
+  pprint = function(self, value, propdef, db)
+    local buf = {}
+    table.insert(buf, (ptypes.bitflags.pprint(self, value.regions, propdef, db):gsub(' | ', '/')))
+    table.insert(buf, '#%d' % value.lock)
+    if value.master then
+      table.insert(buf, '(MASTER KEY)')
+    end
+    return table.concat(buf, ' ')
+  end
 }
 
 ptypes.unknown = {
