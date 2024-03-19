@@ -16,7 +16,7 @@ zip:
 	cd maps && zip -9 -r t2-maps.zip t2/
 
 ss2:
-	./mishtml --gamesys=ss2/shockscp.gam --proplist=proplist.ss2 --html-out=maps/ss2 ss2/{earth,station,eng,medsci,hydro,ops,rec,command,rick,many,shodan}*.mis
+	./mishtml --gamesys ss2/shockscp.gam --proplist proplist.ss2 --strings ss2/strings --html-out maps/ss2 ss2/{earth,station,eng,medsci,hydro,ops,rec,command,rick,many,shodan}*.mis
 
 # T1: miss8.mis doesn't exist, miss18.mis is an easter egg(?) mission with no brushes
 t1:
