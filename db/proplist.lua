@@ -63,7 +63,7 @@ proplist.__index = proplist
 
 -- Load a proplist.txt from disk and return a plist object.
 function proplist.load(file)
-  return proplist.parse(assert(io.open(file, 'rb')):read('*a'))
+  return proplist.parse(assert(io.open(file, 'rb')):read('*a'):gsub('\r\n', '\n'))
 end
 
 local function mungeKey(key)
@@ -108,7 +108,6 @@ local propdef_matcher = string.gsub(
   ' ', '%%s+')
 
 function proplist.parse(buf)
-  buf = buf:gsub('\r\n', '\n')
   local self = {
     _propdefs = {}
   }
