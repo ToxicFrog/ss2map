@@ -45,6 +45,11 @@ flags.register('links') {
   help = 'list all object links';
 }
 
+flags.register('strings') {
+  help = 'Directory containing SS2 .str files to load the localization tables from.';
+  type = flags.string;
+}
+
 local function typeChain(db, obj, path, strip)
   if path then
     path = table.copy(path)
@@ -80,6 +85,12 @@ local function loadDB(args)
 
   -- print('PROPS', args.proplist)
   db:load_proplist(args.proplist)
+
+  if args.strings then
+    for deck=1,9 do
+      db:load_strings(args.strings..'/level0'..deck..'.str')
+    end
+  end
 
   -- print('GAMESYS', args.gamesys)
   db:load(args.gamesys)

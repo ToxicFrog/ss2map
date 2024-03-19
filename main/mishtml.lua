@@ -23,6 +23,11 @@ flags.register('html-out') {
   required = true;
 }
 
+flags.register('strings') {
+  help = 'Directory containing SS2 .str files to load the localization tables from.';
+  type = flags.string;
+}
+
 return function(...)
   local result,args = pcall(flags.parse, {...})
   if not result or args.help or #args < 1 then
@@ -36,6 +41,13 @@ return function(...)
 
   print('PROPS', args.proplist)
   db:load_proplist(args.proplist)
+
+  if args.strings then
+    print('STRINGS', args.strings)
+    for deck=1,9 do
+      db:load_strings(args.strings..'/level0'..deck..'.str')
+    end
+  end
 
   print('GAMESYS', args.gamesys)
   db:load(args.gamesys)
