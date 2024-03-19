@@ -96,7 +96,7 @@ local function parseBody(propdef, body)
       return
     end
 
-    local field = table.copy(ptype)
+    local field = ptype:clone()
     field.name = name;
     field:parseTail(tail)
     propdef.ptype = field

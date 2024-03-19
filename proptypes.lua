@@ -89,7 +89,7 @@ ptypes.enum = {
 ptypes.Position = {
   format = 'pos:{ x:f4 y:f4 z:f4 } x4 rot:{ x:pu2,15 y:pu2,15 z:pu2,15 }';
   read = function(self, data)
-    return vstruct.read('pos:{ x:f4 y:f4 z:f4 } x4 rot:{ x:pu2,15 y:pu2,15 z:pu2,15 }', data)
+    return self.struct:read(data)
   end;
   pprint = function(self, value)
     return '(%.2f,%.2f,%.2f) ϴ (H:%d° P:%d° B:%d°)' %{
@@ -107,12 +107,18 @@ ptypes.unknown = {
 }
 
 for k,v in pairs(ptypes) do
-  local struct = vstruct.compile(v.format)
+  v.struct = v.struct or vstruct.compile(v.format)
   v.parseTail = v.parseTail or function() end
   v.read = v.read or function(self, data)
-    return table.unpack(struct:read(data))
+    return table.unpack(v.struct:read(data))
   end
-  -- autopromote string-only pprints to wrappers around string.interpolate?
+  v.clone = function(self)
+    -- Copy struct over by hand to preserve its metatable
+    local other = { struct = self.struct; }
+    table.merge(other, self, 'ignore')
+    return other
+  end;
+  -- TODO: autopromote string-only pprints to wrappers around string.interpolate?
 end
 
 return ptypes
