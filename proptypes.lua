@@ -102,16 +102,24 @@ ptypes.Position = {
 }
 
 ptypes.sLogData = {
-  format = 'emails:m4 logs:m4 notes:m4 vids:m4';
+  format = 'Email:m4 Log:m4 Note:m4 Vid:m4';
   read = readNoUnpack;
-  pprint = function(self, value)
+  pprint = function(self, value, propdef, db)
     local buf = {}
+    local strs = 'level%02d' % tonumber(propdef.key:match('%d+$'))
     for type,bits in pairs(value) do
       for i,bit in ipairs(bits) do
-        if bit then table.insert(buf, '%s:%d' % {type, i}) end
+        if bit then
+          local title = db:string(strs, type..'Name'..i)
+          if title then
+            table.insert(buf, (title:trim():gsub('\\"', '"'):gsub('\n', '↵')))
+          else
+            table.insert(buf, '%s:%d' % {type, i})
+          end
+        end
       end
     end
-    return table.concat(buf, ' ')
+    return table.concat(buf, ';')
   end;
 }
 

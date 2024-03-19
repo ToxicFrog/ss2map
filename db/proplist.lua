@@ -135,7 +135,10 @@ function property:__tostring()
   return 'ObjProp[%s]' % self.propdef.key_full
 end
 function property:pprint()
-  return self.propdef.ptype:pprint(self.value)
+  return self.propdef.ptype:pprint(
+    self.value,
+    self.propdef,
+    getmetatable(self.obj).__db)
 end
 
 function proplist.wrap(v)
