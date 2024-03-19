@@ -55,7 +55,6 @@ function objectInfo(id) {
 
 function changeLevel() {
   let level = document.getElementById("levelselect").value
-  window.location.hash = level
   showMap(level)
 }
 
@@ -67,6 +66,7 @@ function changeTerrainType() {
 }
 
 function showMap(i) {
+  window.location.hash = level
   if (maps[i] && i != map.index) {
     clearChildren(document.getElementById('map'))
     destroyMap()
