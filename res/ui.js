@@ -66,7 +66,7 @@ function changeTerrainType() {
 }
 
 function showMap(i) {
-  window.location.hash = level
+  window.location.hash = i
   if (maps[i] && i != map.index) {
     clearChildren(document.getElementById('map'))
     destroyMap()
