@@ -78,7 +78,7 @@ function objname:getName()
 
   for k,types in pairs(nametypes) do
     for _,type in pairs(types) do
-      if fqtn:match('^'..type) then
+      if fqtn:lower():match('^'..type:lower()) then
         local name = objname['getNameFor'..k](self)
         if name then return name end
       end
