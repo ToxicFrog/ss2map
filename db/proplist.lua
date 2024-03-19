@@ -108,6 +108,7 @@ local propdef_matcher = string.gsub(
   ' ', '%%s+')
 
 function proplist.parse(buf)
+  buf = buf:gsub('\r\n', '\n')
   local self = {
     _propdefs = {}
   }
