@@ -14,6 +14,8 @@
 -- Finally, we draw "bad brushes", which are brushes for which the rendering is
 -- known to be wrong.
 
+local renderbrush = require 'renderbrush'
+
 local rotatehack = false;
 local brushes = {}
 local brushtypes = {
@@ -98,46 +100,8 @@ local function init(db)
   brushSort(brushes.walls)
 end
 
--- convert worldspace coordinates to screenspace coordinates
-local function world2screen(x, y)
-  do return x,y end
-end
-
-local function drawRotatedRectangle(mode, x, y, width, height, angle)
-  -- We cannot rotate the rectangle directly, but we
-  -- can move and rotate the coordinate system.
-  love.graphics.push()
-  love.graphics.translate(x, y)
-  love.graphics.rotate(angle)
-  love.graphics.rectangle(mode, -width, -height, width*2, height*2)
-  love.graphics.pop()
-end
-
--- Returns the on-screen width and height of a brush's bounding box by applying
--- its pitch and bank rotation fields. (Heading is applied when we actually
--- draw it). For 90° rotations this is exact; other rotations are approximate.
-local function getRotatedWH(brush)
-  local x_size,y_size,z_size = brush.size.x, brush.size.y, brush.size.z
-  local bank, pitch = brush.rotation.x*math.pi, brush.rotation.y*math.pi
-
-  -- apply bank (rotaton around x) first, affecting the relationship between the
-  -- y and z axes.
-  y_size,z_size =
-    y_size * bank:cos() + z_size * bank:sin(),
-    y_size * bank:sin() + z_size * bank:cos()
-
-  -- now apply pitch, affecting the rotation between x and z
-  x_size,z_size =
-    x_size * pitch:cos() + z_size * pitch:sin(),
-    x_size * pitch:sin() + z_size * pitch:cos()
-
-  return x_size, y_size
-end
-
 local function drawBrush(mode, brush)
-  local x,y = world2screen(brush.position.x, brush.position.y)
-  local w,h = getRotatedWH(brush)
-  drawRotatedRectangle(mode, x, y, w, h, brush.rotation.z*math.pi)
+  return renderbrush.draw(mode, brush)
 end
 
 local tx,ty = 0,0
@@ -298,7 +262,7 @@ local function drawObjects(brushes)
       -- love.graphics.setColor(0, 0, 0, 1)
       -- drawBrush('fill', brush)
       love.graphics.setColor(1, 1, 0, 1)
-      drawBrush('line', brush)
+      renderbrush.box('line', brush)
     end
   end
 end
@@ -315,12 +279,12 @@ end
 -- multiples of 180, in pink brushes where they are rotations of 90,
 -- and in red brushes rotated at other angles.
 local function drawBadBrush(brush)
-  if brush.shape.family ~= 0 or brush.shape.index ~= 1 then -- not a cube? o noes
-    love.graphics.setColor(1, 0, 0, 0.2)
-  else
-    return
-  end
-  drawBrush('line', brush)
+  -- if brush.shape.family ~= 0 or brush.shape.index ~= 1 then -- not a cube? o noes
+  --   love.graphics.setColor(1, 0, 0, 0.2)
+  -- else
+  --   return
+  -- end
+  -- drawBrush('line', brush)
 end
 
 local function drawBadBrushes(brushes, ...)
