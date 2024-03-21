@@ -44,7 +44,8 @@ can find them in the `proplists` directory:
 - `t2.proplist`: Thief 2 v1.25
 
 The Lua files in that directory contain additional information about on-disk
-property layout not included in the `proplist.txt`.
+property layout not included in the `proplist.txt`. To select one of these, use
+the `--propformat` command line flag, e.g. `--propformat ss2`.
 
 If you need to add support for another engine version, you can generate the
 `proplist.txt` yourself:
@@ -98,7 +99,7 @@ links.
 Example usage:
 
     mislist \
-      --proplist proplist.ss2 \
+      --propformat ss2 \
       --gamesys ss2/shockscp.gam \
       --links --props --inherited --ancestry \
       ss2/medsci1.mis
@@ -117,7 +118,7 @@ renderer.
 It can load multiple maps at once:
 
     misview \
-      --proplist proplist.ss2 \
+      --propformat ss2 \
       --gamesys ss2/shockscp.gam \
       ss2/*.mis
 
@@ -126,6 +127,7 @@ Once loaded, the following controls are available:
     arrow keys or click + drag: pan view
     w/s: zoom in/out
     n/p: next/previous map
+    i: switch between interior (detail) and exterior (outline) view
     r: hot-reload renderer
     q: quit
 
@@ -136,9 +138,8 @@ The entry point is `www/map.html`. This can be viewed locally or uploaded to a w
 server.
 
 The terrain is pre-rendered and exported as a PNG, while object data is exported
-as JSON and rendered in the browser. Under the hood this is just `misview` with
-some different command line options so that it exports HTML rather than drawing
-to the screen, and it is invoked the same way.
+as JSON and rendered in the browser. Under the hood this shares most of its implementation
+with `misview`, but has a different command line interface.
 
 If you just need to regenerate the JSON but not the terrain images, use the
 `--no-genimages` command line flag to speed things up significantly by skipping
@@ -150,7 +151,7 @@ you use the order you want:
 
     mkdir -p www/maps
     mishtml \
-      --proplist proplist.ss2 \
+      --propformat ss2 \
       --gamesys ss2/shockscp.gam \
       --html-out www/maps \
       ss2/{earth,station,eng,medsci,hydro,ops,rec,command}*.mis
