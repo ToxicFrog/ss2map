@@ -22,6 +22,14 @@ local function addinfo(buf, k, v)
   end
 end
 
+local function append(dst, src, ...)
+  if not src then return dst end
+  for i,v in ipairs(src) do
+    table.insert(dst, v)
+  end
+  return append(dst, ...)
+end
+
 local function objectinfo(db, brush)
   local oid = brush.primal
   local obj = db:object(oid)
@@ -68,23 +76,25 @@ local function objectinfo(db, brush)
 
   -- Generic properties
   local buf_generic = { _props = {} }
+  local buf_unknown = { _props = {} }
   for prop in obj:getProperties(false) do
     local info = prop:pprint()
     if info:match('^%x%x %x%x %x%x') and #info > 36 then
       -- truncate unknown-property hexdumps to 12 bytes for the map display
       info = info:sub(1,36)..'⋯'
+      addinfo(buf_unknown, prop.key_full, info)
+    else
+      addinfo(buf_generic, prop.key_full, info)
     end
-    addinfo(buf_generic, prop.key_full, info)
   end
   table.sort(buf_generic._props)
+  table.sort(buf_unknown._props)
 
   return obj,
-    '"%d": {%s, %s, _props: [%s, %s] }' % {
+    '"%d": {%s, _props: [%s] }' % {
       oid,
-      table.concat(buf, ','),
-      table.concat(buf_generic, ','),
-      table.concat(buf._props, ','),
-      table.concat(buf_generic._props, ',')
+      table.concat(append(buf, buf_generic, buf_unknown), ','),
+      table.concat(append(buf._props, buf_generic._props, buf_unknown._props), ','),
     }
 end
 
