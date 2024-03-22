@@ -47,13 +47,11 @@ The Lua files in that directory contain additional information about on-disk
 property layout not included in the `proplist.txt`. To select one of these, use
 the `--propformat` command line flag, e.g. `--propformat ss2`.
 
-If you need to add support for another engine version, you can generate the
-`proplist.txt` yourself:
+#### Adding support for new properties
 
-- make sure your `user.bnd` file contains the line `bind : edit_command`
-- start the game
-- press `:` to open the console, then run the command `dump_props_full`
-- the `proplist.txt` file will appear in your game install directory
+See [proplists/README.md](./proplists/README.md) for detailed instructions on
+both how to add support for individual properties, and how to generate a new
+proplist file to support a different engine version.
 
 ### Gamesys (shock2.gam)
 

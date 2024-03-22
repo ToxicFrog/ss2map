@@ -1,13 +1,22 @@
+-- Use the common proptypes as a basis.
 local ptypes = require 'proplists.common'
 
--- TODO: in Thief 1, the enum field is named RegionMask and is only 2 bytes long, not 4.
+-- Information about both locks (KeyDst) and keys (KeySrc).
 ptypes.sKeyInfo = {
+  -- On-disk format, as a vstruct format. You can provide either this or a read()
+  -- function.
   format = '{ master:b1 regions:m4 lock:u1 }';
+  -- Optional; this is used to parse the comments attached to enum and bitflag
+  -- fields. In this case, only one field in sKeyInfo has these comments, so we
+  -- just watch for it and then outsource the parsing to the common bitflags type.
   parseTail = function(self, name, type, tail)
     if name == 'RegionID' then
       ptypes.bitflags.parseTail(self, name, type, tail)
     end
   end;
+  -- Function for producing a human-readable version of the property value.
+  -- Self is going to be the ptype definition, value is the property value, and
+  -- propdef and db are the enclosing tagfile and database.
   pprint = function(self, value, propdef, db)
     local buf = {}
     table.insert(buf, (ptypes.bitflags.pprint(self, value.regions, propdef, db):gsub(' | ', '/')))
