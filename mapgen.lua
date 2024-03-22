@@ -70,9 +70,9 @@ local function objectinfo(db, brush)
   local buf_generic = { _props = {} }
   for prop in obj:getProperties(false) do
     local info = prop:pprint()
-    if info:match('^Unknown: ') then
-      -- strip 'unknown' prefix and truncate to 24 bytes
-      info = info:sub(10,81)
+    if info:match('^%x%x %x%x %x%x') and #info > 36 then
+      -- truncate unknown-property hexdumps to 12 bytes for the map display
+      info = info:sub(1,36)..'⋯'
     end
     addinfo(buf_generic, prop.key_full, info)
   end
