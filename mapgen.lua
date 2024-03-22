@@ -1,6 +1,7 @@
 -- HTML map exporter for SS2.
 -- Adapted from the ss1 map exporter.
 local render = require 'render'
+local libmislist = require 'libmislist'
 
 local function point(id, x, y)
   return "point(objs[%d], %f, %f);" % {
@@ -124,6 +125,7 @@ local function drawObjects(db)
 end
 
 local function mkMap(js, mapinfo, idx)
+  print('JS', idx..'.js', '(%s: %s)' % { mapinfo.files[1], mapinfo.name })
   local output = flags.parsed.html_out
   local map = { level = idx; name = mapinfo.name; }
 
@@ -145,6 +147,18 @@ local function mkMap(js, mapinfo, idx)
     WALLS = table.concat(objMap, '\n    ');
   }
   io.writefile(output .. "/" .. idx .. ".js", js:interpolate(data))
+
+  print('LIST', idx..'.txt')
+  -- HACK HACK HACK, libmislist should take a writer function instead since we
+  -- can't rebind *out* in a safe way.
+  io.output(output .. '/' .. idx .. '.txt')
+  libmislist.listObjects(mapinfo.db, {
+    ancestry = true;
+    links = true;
+    props = true;
+    inherited = true;
+  })
+  io.output(io.stdout)
 
   if flags.parsed.genimages then
     render.drawToFile(output .. '/' .. idx)
@@ -212,9 +226,7 @@ local function mkMaps(info)
   for i,map in ipairs(info.maps) do
     -- each map is going to have the keys { name, db, files, short, icon } with
     -- icon and short being optional
-    i = i-1
-    print('JS', i..'.js', '(%s: %s)' % { map.files[1], map.name })
-    table.insert(index, mkMap(js, map, i))
+    table.insert(index, mkMap(js, map, i-1))
   end
 
   mkViewer(html, info, index)

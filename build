@@ -15,10 +15,21 @@ THIEF2_GAMESYS=${THIEF2_GAMESYS:=dark.gam}
 set -e
 
 function main {
-  for cmd in "$@"; do
+  local cmds=()
+  while [[ $1 ]]; do
+    if [[ $1 == -- ]]; then
+      shift; break
+    elif [[ $1 == -* ]]; then
+      break
+    else
+      cmds+=("$1")
+      shift
+    fi
+  done
+
+  for cmd in "${cmds[@]}"; do
     echo "build/$cmd"
-    build/$cmd
-    shift
+    build/$cmd "$@"
   done
 }
 
@@ -27,15 +38,15 @@ function build/clean {
 }
 
 function build/ss2 {
-	mkmaps ss2 $SHOCK2/$SHOCK2_GAMESYS $SHOCK2/{earth,station,eng,medsci,hydro,ops,rec,command,rick,many,shodan}*.mis
+	mkmaps ss2 shockscp.gam "$@"
 }
 
 function build/t1 {
-  mkmaps t1 $THIEF1/$THIEF1_GAMESYS $THIEF1/miss{1..7}.mis t1/miss{9..17}.mis
+  mkmaps t1 dark.gam "$@"
 }
 
 function build/t2 {
-  mkmaps t2 $THIEF2/$THIEF2_GAMESYS $THIEF2/miss{1,2}.mis t2/miss{4..16}.mis
+  mkmaps t2 dark.gam "$@"
 }
 
 function build/test {
@@ -56,10 +67,12 @@ function build/deploy {
 
 function build/zip {
 	cd maps
-  rm -f t1-maps.zip t2-maps.zip ss2-maps.zip
-	zip -9 -r ss2-maps.zip ss2/
-	zip -9 -r t1-maps.zip t1/
-	zip -9 -r t2-maps.zip t2/
+  for game in t1 t2 ss2; do
+    rm -rf "${game}-maps.zip"
+    echo -n "${game}-maps.zip: "
+    zip -9qr "${game}-maps.zip" "${game}"
+    echo "done."
+  done
 }
 
 function mkmaps {
@@ -70,23 +83,26 @@ function mkmaps {
   # FIXME: generalize strings
   mkdir -p maps/$game
   ./mishtml \
+    --gamedir $game \
     --propformat $game \
-    --gamesys $gamesys \
+    --gameinfo gameinfo/$game-objects.lua,gameinfo/$game-maps.lua \
     --strings ss2/strings \
     --html-out maps/$game \
     "$@" &
 
-  local i=0
-  for map in "$@"; do
-    printf 'LIST\t%s\n' "$map"
-    ./mislist \
-      --propformat $game \
-      --gamesys $gamesys \
-      --strings ss2/strings \
-      --props --ancestry --inherited --links \
-      "$map" > "maps/$game/${i}.txt"
-    ((++i))
-  done
+  # FIXME: this doesn't work now that missions aren't passed on the command line,
+  # list generation has to be made part of mapgen.lua
+  # local i=0
+  # for map in "$@"; do
+  #   printf 'LIST\t%s\n' "$map"
+  #   ./mislist \
+  #     --propformat $game \
+  #     --gamesys $game/$gamesys \
+  #     --strings ss2/strings \
+  #     --props --ancestry --inherited --links \
+  #     "$map" > "maps/$game/${i}.txt"
+  #   ((++i))
+  # done
 
   wait
 }

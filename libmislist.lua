@@ -1,5 +1,6 @@
 -- Implementation of mission listing interface.
--- Can output to any writer function, so it can be used by both mislist and mishtml.
+-- Writes to *out*, so if you need it somewhere other than stdout, do the thing
+-- with io.output() first and restore it after.
 require 'util'
 
 local function typeChain(db, obj, path, strip)
@@ -61,6 +62,7 @@ local function listObjs(db, args)
     end
 
     if args.props then
+      -- TODO: this should sort props in the same way mishtml does
       local src = obj
       printf('  Dimensions: %dx%dx%d\n', brush.size.x*2, brush.size.y*2, brush.size.z*2)
       printf('  Properties:\n')
