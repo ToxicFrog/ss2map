@@ -124,8 +124,6 @@ local function mkMap(js, db, idx, name)
   local data = {
     INDEX = idx;
     BASENAME = tostring(idx);
-    WIDTH = 1024;
-    HEIGHT = 1024;
     BBOX_X = x;
     BBOX_Y = -(y+h);
     BBOX_W = w;

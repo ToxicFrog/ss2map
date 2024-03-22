@@ -1,12 +1,5 @@
 // KineticJS map rendering functions //
 
-function line(x1, y1, x2, y2, colour) {
-  map.mapLayer.add(new Kinetic.Line({
-    points: [x1*SCALE, (map.height-y1)*SCALE, x2*SCALE, (map.height-y2)*SCALE],
-    stroke: colour,
-  }));
-}
-
 function point(obj, x, y) {
   let cat = getCategoryForType(obj._type)
   var circ = new Kinetic.Circle({
