@@ -143,15 +143,28 @@ If you just need to regenerate the JSON but not the terrain images, use the
 `--no-genimages` command line flag to speed things up significantly by skipping
 terrain generation.
 
-The output directory needs to exist before it is run. Mission files will be listed
-in the generated maps *in the order specified on the command line*, so make sure
-you use the order you want:
+Information about the game to generate maps for, including which maps to load
+in what order and how objects should be categorized, is stored in separate
+*gameinfo scripts* for each game, loaded with `--gameinfo`. You also need a
+`--gamedir` so that it knows what directory to look for the map and gamesys files
+in.
 
-    mkdir -p www/maps
+    mkdir -p maps/ss2/
     mishtml \
+      --html-out maps/ss2 \
+      --propformat ss2 \
+      --gamedir ss2 \
+      --gameinfo gameinfo/ss2-objects.lua,gameinfo/ss2-maps.lua
+
+You can also omit the gameinfo that lists the maps and instead list maps on the
+command line, at the cost of losing some useful map metadata in the UI:
+
+    mkdir -p maps/ss2/
+    mishtml \
+      --html-out maps/ss2 \
       --propformat ss2 \
       --gamesys ss2/shockscp.gam \
-      --html-out www/maps \
+      --gameinfo gameinfo/ss2-objects.lua \
       ss2/{earth,station,eng,medsci,hydro,ops,rec,command}*.mis
 
 #### Using the Map

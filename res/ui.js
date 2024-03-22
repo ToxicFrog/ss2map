@@ -96,8 +96,6 @@ function initMap() {
     return;
 
   var container = document.getElementById('mapcell');
-  console.log(container);
-  console.log(container.getBoundingClientRect());
   map.stage = new Kinetic.Stage({
     container: 'map',
     width: container.getBoundingClientRect().width,
@@ -239,18 +237,8 @@ function objectMatches(objs, obj, name) {
   return nameMatches(obj, name) || contentsMatch(objs, obj, name)
 }
 
-var short_levels = [
-  "🌐", "🛰",
-  "🔧1", "🔧2",
-  "🧪1", "🧪2",
-  "🌿1", "🌿2", "🌿3",
-  "🖧1", "🖧2", "🖧3", "🖧4",
-  "🏀1", "🏀2", "🏀3",
-  "✯1", "✯2",
-  "🗡1", "🗡2", "🗡3",
-  "🧠", "🖳"
-]
 function appendSearchResult(level, obj) {
+  let map = maps[level]
   var results = document.getElementById("search-results")
   results.style.display = ''
   var row = results.insertRow(-1)
@@ -263,7 +251,8 @@ function appendSearchResult(level, obj) {
   row.onmouseenter = hilightSearchResult.bind(undefined, level, obj)
   row.onmouseleave = unhilightSearchResult.bind(undefined, obj)
   row.onclick = displayAndMark.bind(undefined, level, obj)
-  row.insertCell(-1).innerHTML = short_levels[level]
+  // TODO: support map.icon
+  row.insertCell(-1).innerHTML = '<label title="' + map.title + '">' + map.short + '</label>'
   row.insertCell(-1).innerHTML = obj.name
 }
 
@@ -272,10 +261,12 @@ function colourTarget(obj, stroke, fill) {
   obj._target.setStroke(stroke)
   obj._target.setFill(fill)
   obj._target.moveToTop()
-  obj._target.draw()
+  obj._target.draw() // TODO: this produces an 'f is null' stacktrace in Kinetic
 }
 
 function displayAndMark(level, obj) {
+  // TODO: sometimes doesn't work, but only sometimes
+  console.log('displayAndMark', level)
   if (map.marked) {
     colourTarget(map.marked, '#ffffff', '#ffffff')
   }
@@ -289,7 +280,6 @@ function displayAndMark(level, obj) {
 }
 
 function hilightSearchResult(level, obj) {
-  console.log(obj)
   writeMessage(infoToTable(obj))
   if (level != map.index) return
   let pos = obj._position;

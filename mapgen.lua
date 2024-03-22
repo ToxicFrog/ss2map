@@ -113,15 +113,18 @@ local function drawObjects(db)
   return draw,info
 end
 
-local function mkMap(js, db, idx, name)
+local function mkMap(js, mapinfo, idx)
   local output = flags.parsed.html_out
-  local map = { level = idx; name = name; }
+  local map = { level = idx; name = mapinfo.name; }
 
-  local objMap,objInfo = drawObjects(db)
-  render.init(db)
+  local objMap,objInfo = drawObjects(mapinfo.db)
+  render.init(mapinfo.db)
   local x,y,w,h = render.getBBox()
 
   local data = {
+    LEVEL_TITLE = mapinfo.name;
+    SHORT = mapinfo.short or '';
+    ICON = mapinfo.icon or '';
     INDEX = idx;
     BASENAME = tostring(idx);
     BBOX_X = x;
@@ -130,7 +133,6 @@ local function mkMap(js, db, idx, name)
     BBOX_H = h;
     OBJECT_INFO = table.concat(objInfo, ",\n    ");
     WALLS = table.concat(objMap, '\n    ');
-    LEVEL_TITLE = map.name;
   }
   io.writefile(output .. "/" .. idx .. ".js", js:interpolate(data))
 
@@ -157,7 +159,7 @@ local function mkViewer(html, index)
   })
 end
 
-local function mkMaps(maplist)
+local function mkMaps(info)
   local output = flags.parsed.html_out
 
   print("Loading templates from res/template.{html,js}...")
@@ -170,13 +172,15 @@ local function mkMaps(maplist)
   end
 
   local index = {}
-  for i,db in ipairs(maplist) do
+  for i,map in ipairs(info.maps) do
+    -- each map is going to have the keys { name, db, files, short, icon } with
+    -- icon and short being optional
     i = i-1
-    print('JS', i..'.js', '('..db.name..')')
-    table.insert(index, mkMap(js, db, i, db.name))
+    print('JS', i..'.js', '(%s: %s)' % { map.files[1], map.name })
+    table.insert(index, mkMap(js, map, i))
   end
 
   mkViewer(html, index)
 end
 
-do return mkMaps end
+return mkMaps
