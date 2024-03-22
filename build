@@ -67,10 +67,11 @@ function build/deploy {
 
 function build/zip {
 	cd maps
-  for game in t1 t2 ss2; do
-    rm -rf "${game}-maps.zip"
+  for game in *; do
+    [[ -e $game/map.html ]] || continue
     echo -n "${game}-maps.zip: "
-    zip -9qr "${game}-maps.zip" "${game}"
+    rm -rf "zips/${game}-maps.zip"
+    zip -9qr "zips/${game}-maps.zip" "${game}"
     echo "done."
   done
 }
@@ -80,7 +81,8 @@ function mkmaps {
   local gamesys="$2"
   shift 2
 
-  # FIXME: generalize strings
+  # FIXME: generalize strings, if they are useful for anything in T1/T2 -- book
+  # and scroll titles, maybe?
   mkdir -p maps/$game
   ./mishtml \
     --gamedir $game \
@@ -89,20 +91,6 @@ function mkmaps {
     --strings ss2/strings \
     --html-out maps/$game \
     "$@" &
-
-  # FIXME: this doesn't work now that missions aren't passed on the command line,
-  # list generation has to be made part of mapgen.lua
-  # local i=0
-  # for map in "$@"; do
-  #   printf 'LIST\t%s\n' "$map"
-  #   ./mislist \
-  #     --propformat $game \
-  #     --gamesys $game/$gamesys \
-  #     --strings ss2/strings \
-  #     --props --ancestry --inherited --links \
-  #     "$map" > "maps/$game/${i}.txt"
-  #   ((++i))
-  # done
 
   wait
 }
