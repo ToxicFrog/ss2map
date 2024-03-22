@@ -130,7 +130,6 @@ local function mkMap(js, db, idx, name)
     BBOX_Y = -(y+h);
     BBOX_W = w;
     BBOX_H = h;
-    TILE_INFO = "";
     OBJECT_INFO = table.concat(objInfo, ",\n    ");
     WALLS = table.concat(objMap, '\n    ');
     LEVEL_TITLE = map.name;

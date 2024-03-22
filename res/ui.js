@@ -44,11 +44,6 @@ function infoToTable(info) {
   return buf;
 }
 
-function tileInfo(x, y) {
-  return "[terrain info not implemented]"
-  return infoToTable(map.tile_info[x + "," + y])
-}
-
 function objectInfo(id) {
   return infoToTable(map.object_info[id]);
 }
