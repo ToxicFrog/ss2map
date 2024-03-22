@@ -176,3 +176,45 @@ defcategory 'Doors' {
   };
 }
 
+defcategory 'Plot Decorations' {
+  colour = '#0080ff';
+  info = "Plot-related miscellaneous terrain and some items.";
+  types = {
+    'Object/Physical/Plot Items',
+  }
+}
+
+defcategory 'Decorative' {
+  colour = '#ffffff';
+  info = "Plot-related miscellaneous terrain and some items.";
+  types = {
+    'Object/Physical/Decorative',
+    'Object/Physical/Lights',
+    'Object/Physical/Terrain',
+    'Object/Physical/Furniture',
+  }
+}
+
+defcategory 'Traps and Triggers' {
+  colour = '#ffffff';
+  info = 'Event triggers, level behaviour contraptions, etc.';
+  types = {
+    'Object/Traps',
+    'Object/Marker',
+  }
+}
+
+defcategory 'SFX' {
+  colour = '#FFFFFF';
+  types = {
+    'Object/SFX',
+  }
+}
+
+defcategory 'Other' {
+  colour = '#ffffff';
+  info = 'Anything not in the above categories.';
+  types = {
+    'Object',
+  }
+}
