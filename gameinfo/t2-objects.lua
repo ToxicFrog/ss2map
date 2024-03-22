@@ -1,20 +1,8 @@
 setgamesys 'dark.gam'
 
---[[
-  categories:
-  - loot
-  - enemies
-  - neutrals
-  - doors
-  - keys
-  - containers
-  - traps/triggers
-  - everything else
-]]
-
 defcategory 'Loot' {
   colour = '#00ffff';
-  display = true;
+  visible = true;
   info = 'Coins, gems, jewelry, and other forms of filthy lucre.';
   types = {
     'Object/Physical/Treasure',
@@ -23,7 +11,7 @@ defcategory 'Loot' {
 
 defcategory 'Supplies & Equipment' {
   colour = '#8080ff';
-  display = true;
+  visible = true;
   info = 'Arrows, potions, grenades, etc.';
   types = {
     -- TODO: split these up more?
@@ -41,7 +29,7 @@ defcategory 'Supplies & Equipment' {
 
 defcategory 'Keys' {
   colour = '#80ff80';
-  display = true;
+  visible = true;
   types = {
     'Object/Physical/Key',
   };
@@ -49,7 +37,7 @@ defcategory 'Keys' {
 
 defcategory 'Books & Scrolls' {
   colour = '#80ff80';
-  display = true;
+  visible = true;
   types = {
     'Object/Physical/Household/Book',
     'Object/Physical/Household/Scroll',
@@ -58,7 +46,7 @@ defcategory 'Books & Scrolls' {
 
 defcategory 'Bystanders' {
   colour = '#FF8080';
-  display = true;
+  visible = true;
   info = 'Unarmed civilians.';
   types = {
     'Object/Physical/Creature/Animal/Human/Bystander',
@@ -66,8 +54,8 @@ defcategory 'Bystanders' {
 }
 
 defcategory 'Guards' {
-  colour = '#FF8080';
-  display = true;
+  colour = '#FF0000';
+  visible = true;
   info = 'Guards, hammerites, etc.';
   types = {
     'Object/Physical/Creature/Animal/Human',
@@ -75,8 +63,8 @@ defcategory 'Guards' {
 }
 
 defcategory 'Other Threats' {
-  colour = '#FF8080';
-  display = true;
+  colour = '#FF0000';
+  visible = true;
   info = 'Zombies, elementals, robots, giant spiders...';
   types = {
     'Object/Physical/Creature/Beast',
@@ -88,7 +76,7 @@ defcategory 'Other Threats' {
 
 defcategory 'Containers' {
   colour = '#A0A0A0';
-  display = true;
+  visible = true;
   info = 'Things that can contain other things.';
   types = {
     'Object/Physical/Container',
@@ -97,7 +85,7 @@ defcategory 'Containers' {
 
 defcategory 'Controls' {
   colour = '#00ff00';
-  display = true;
+  visible = true;
   info = 'Switches, buttons, and pressure plates.';
   types = {
     'Object/Physical/Gizmo/Switches',
@@ -107,7 +95,7 @@ defcategory 'Controls' {
 
 defcategory 'Doors' {
   colour = '#A0A000';
-  display = true;
+  visible = true;
   types = {
     'Object/Physical/TerrainLike/Door',
   };

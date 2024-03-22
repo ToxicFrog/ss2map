@@ -19,15 +19,15 @@ setgamesys 'shockscp.gam'  -- Shock Community Patch
 defcategory 'Equipment' {
   -- Colour to use for icons on the map. Required.
   colour = '#ff8080';
-  -- Whether this category should be displayed on the map by default, or hidden
+  -- Whether this category should be visible on the map by default, or hidden
   -- until the user turns it on. Optional, default false.
-  display = true;
-  -- If present, this will be displayed in a tooltip on mouseover. Optional
+  visible = true;
+  -- If present, this will be visibleed in a tooltip on mouseover. Optional
   -- human-friendly description of what this category contains.
   info = 'Weapons, armour, implants, and software upgrades.';
   -- Fully qualified type names that should be included in this category. Items
   -- are matched with this category if their FQTN starts with one of these.
-  -- These are also displayed in the tooltip after the info, one per line.
+  -- These are also visibleed in the tooltip after the info, one per line.
   -- Required. Case insensitive.
   types = {
     'Object/Physical/Weapon',
@@ -38,7 +38,7 @@ defcategory 'Equipment' {
 
 defcategory 'Software' {
   colour = '#ff0080';
-  display = true;
+  visible = true;
   info = 'Software upgrades and MFD games';
   types = {
     'Object/Physical/Goodies/Softs',
@@ -48,7 +48,7 @@ defcategory 'Software' {
 
 defcategory 'Keys' {
   colour = '#80ff80';
-  display = true;
+  visible = true;
   info = 'Keycards';
   types = {
     'Object/Physical/Keys',
@@ -57,7 +57,7 @@ defcategory 'Keys' {
 
 defcategory 'Audio Logs' {
   colour = '#80ff80';
-  display = true;
+  visible = true;
   info = 'The last words of the dead.';
   types = {
     'Object/Physical/Goodies/Audio Log',
@@ -66,7 +66,7 @@ defcategory 'Audio Logs' {
 
 defcategory 'Ammo' {
   colour = '#8080ff';
-  display = true;
+  visible = true;
   info = 'Food for your trusty guns.';
   types = {
     'Object/Physical/Goodies/Ammo',
@@ -77,7 +77,7 @@ defcategory 'Ammo' {
 
 defcategory 'Meds' {
   colour = '#00ffff';
-  display = true;
+  visible = true;
   info = 'Hypos, medkits, etc.';
   types = {
     'Object/Physical/Goodies/Patches',
@@ -86,7 +86,7 @@ defcategory 'Meds' {
 
 defcategory 'Tools' {
   colour = '#80ff80';
-  display = true;
+  visible = true;
   info = 'Batteries, ICE picks, etc.';
   types = {
     'Object/Physical/Devices',
@@ -95,7 +95,7 @@ defcategory 'Tools' {
 
 defcategory 'Chems' {
   colour = '#80ff80';
-  display = true;
+  visible = true;
   info = 'Research chamicals';
   types = {
     'Object/Physical/Goodies/Chemicals',
@@ -104,7 +104,7 @@ defcategory 'Chems' {
 
 defcategory 'Researchables' {
   colour = '#80ff80';
-  display = true;
+  visible = true;
   info = 'Organs and whatnot';
   types = {
     'Object/Physical/Goodies/Researchable',
@@ -113,7 +113,7 @@ defcategory 'Researchables' {
 
 defcategory 'Nanites' {
   colour = '#80ff80';
-  display = true;
+  visible = true;
   info = 'Nanites';
   types = {
     'Object/Physical/Goodies/Nanites',
@@ -122,7 +122,7 @@ defcategory 'Nanites' {
 
 defcategory 'Cyber Modules' {
   colour = '#80ff80';
-  display = true;
+  visible = true;
   info = 'yum';
   types = {
     'Object/Physical/Goodies/EXP Cookies',
@@ -131,7 +131,7 @@ defcategory 'Cyber Modules' {
 
 defcategory 'Other Goodies' {
   colour = '#00ffff';
-  display = true;
+  visible = true;
   info = 'Anything not in the above categories.';
   types = {
     'Object/Physical/Goodies',
@@ -140,7 +140,7 @@ defcategory 'Other Goodies' {
 
 defcategory 'Containers' {
   colour = '#A0A0A0';
-  display = true;
+  visible = true;
   info = 'Things that can contain other things.';
   types = {
     'Object/Physical/Corpses',
@@ -160,7 +160,7 @@ defcategory 'Critters' {
 
 defcategory 'Functional' {
   colour = '#00ff00';
-  display = true;
+  visible = true;
   info = 'Interactable objects like computers, buttons, and card readers.';
   types = {
     'Object/Physical/Functional',
@@ -169,7 +169,7 @@ defcategory 'Functional' {
 
 defcategory 'Doors' {
   colour = '#A0A000';
-  display = true;
+  visible = true;
   info = 'They open. They shut.';
   types = {
     'Object/Physical/Terrain/Doors',

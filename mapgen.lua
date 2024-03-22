@@ -143,8 +143,35 @@ local function mkMap(js, mapinfo, idx)
   return map
 end
 
-local function mkViewer(html, index)
+local cat_template = [[
+  {
+    name: "${name}",
+    colour: "${colour}",
+    visible: ${visible},
+    description: "${info}",
+    types: [ ${typelist} ]
+  },
+]]
+local function mkCategoryList(mapinfo)
+  local buf = { 'var CATEGORIES = [' }
+  for _,cat in ipairs(mapinfo.categories) do
+    cat.typelist = {}
+    for _,type in ipairs(cat.types) do table.insert(cat.typelist, '"%s"' % type) end
+    cat.typelist = table.concat(cat.typelist, ',')
+    cat.visible = cat.visible or false
+    table.insert(buf, cat_template:interpolate(cat))
+  end
+  table.insert(buf, '];')
+  return table.concat(buf, '\n')
+end
+
+local function mkViewer(html, info, index)
+  -- TODO: use info to generate categories.js
   local output = flags.parsed.html_out
+
+  print('FILTERS', 'filters.js')
+  io.writefile(output .. '/filters.js', mkCategoryList(info))
+
   print('HTML', 'map.html')
   io.writefile(output .. "/" .. 'map.html', html:interpolate {
     DEFAULT_LEVEL = index[1].level;
@@ -180,7 +207,7 @@ local function mkMaps(info)
     table.insert(index, mkMap(js, map, i))
   end
 
-  mkViewer(html, index)
+  mkViewer(html, info, index)
 end
 
 return mkMaps
