@@ -60,7 +60,8 @@ function changeTerrainType() {
   map.stage.draw();
 }
 
-function showMap(i) {hash
+function showMap(i) {
+  map.marked = null
   window.location.hash = i
   document.getElementById("mislist_download").href = i + ".txt"
   if (maps[i] && i != map.index) {
@@ -268,6 +269,8 @@ function displayAndMark(level, obj) {
   // TODO: sometimes doesn't work, but only sometimes
   console.log('displayAndMark', level)
   if (map.marked) {
+    // This fails if we've swapped away from that map after marking, or deleted
+    // the marker
     colourTarget(map.marked, '#ffffff', '#ffffff')
   }
   showMap(level)
