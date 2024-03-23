@@ -155,6 +155,11 @@ ptypes.sLogData = {
   end;
 }
 
+ptypes.sESndTagList = {
+  format = 'x4 z';
+  pprint = ptypes.string.pprint;
+}
+
 ptypes.unknown = {
   format = '';
   read = function(self, data) return data end;
