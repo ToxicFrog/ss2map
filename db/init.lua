@@ -79,7 +79,7 @@ function db:load_proplist(format)
 end
 
 function db:load_strings(file)
-  local name = file:match('([^/]+)%.str$')
+  local name = file:lower():match('([^/]+)%.str$')
   assert(name, "unable to determine basename for string table "..file)
   self._strings[name] = strings.load(file)
 end

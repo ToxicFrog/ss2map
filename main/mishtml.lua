@@ -54,7 +54,9 @@ return function(...)
   if args.strings then
     print('STRINGS', args.strings)
     for deck=1,9 do
+      -- Just blindly try to load the string table for each deck, and ignore failures.
       db:load_strings(args.strings..'/level0'..deck..'.str')
+      db:load_strings(args.strings..'/LEVEL0'..deck..'.STR')
     end
   end
 
