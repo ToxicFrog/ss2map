@@ -85,6 +85,7 @@ function build/zip {
     zip -9qr "zips/${game}-maps.zip" "${game}"
     echo "done."
   done
+  cd ..
 }
 
 function mkmaps {
