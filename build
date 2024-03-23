@@ -38,19 +38,15 @@ function build/clean {
 }
 
 function build/ss2 {
-	mkmaps ss2 shockscp.gam "$@"
+	mkmaps ss2 "$@"
 }
 
 function build/t1 {
-  mkmaps t1 dark.gam "$@"
+  mkmaps t1 "$@"
 }
 
 function build/t2 {
-  mkmaps t2 dark.gam "$@"
-}
-
-function build/test {
-  mkmaps $SHOCK2/{earth,eng2,medsci1,hydro1,many}.mis
+  mkmaps t2 "$@"
 }
 
 function build/all {
@@ -77,22 +73,18 @@ function build/zip {
 }
 
 function mkmaps {
-  local game="$1"
-  local gamesys="$2"
-  shift 2
+  local game="$1"; shift
 
   # FIXME: generalize strings, if they are useful for anything in T1/T2 -- book
   # and scroll titles, maybe?
   mkdir -p maps/$game
   ./mishtml \
-    --gamedir $game \
-    --propformat $game \
-    --gameinfo gameinfo/$game-objects.lua,gameinfo/$game-maps.lua \
-    --strings ss2/strings \
+    --gamedir game/$game \
+    --propformat ${game%_*} \
+    --gameinfo gameinfo/${game%_*}-objects.lua,gameinfo/${game}-maps.lua \
+    --strings game/ss2/strings \
     --html-out maps/$game \
-    "$@" &
-
-  wait
+    "$@"
 }
 
 [[ $1 ]] || set -- all
