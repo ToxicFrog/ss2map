@@ -35,9 +35,43 @@ mktype('ushort', 'u2', '%u')
 mktype('uint', 'u4', '%u')
 mktype('uint_hex', 'u4', '%x')
 
--- Strings may need more work. They generally seem to be c4 null-terminated but
--- I don't know if that's universally true.
-mktype('string', 'x4 z', '%s')
+-- Strings are tricky. Something proplist.txt reports as a "string" might be a
+-- fixed size string (zN), or a counted string (c4).
+-- As a rough heuristic, we look at the comment. If it says the string's max
+-- length is 2047 it's almost always a counted string, e.g. BloodType. If the
+-- length is something else it's probably a fixed size string, e.g. DestLevel.
+ptypes.string = {
+  pprint = function(self, value)
+    -- return '%q' % value
+    return value
+      :gsub('%c', function(c) return '\\x%02X' % c:byte() end)
+  end;
+  read = function(self, data)
+    local count = ptypes.uint:read(data)
+    local val = data
+    if count == #data - 4 then
+      -- Counted string, drop the first four bytes
+      val = data:sub(5)
+    end
+    -- In either case length includes the null terminator, so strip it
+    return (val:gsub('%z+$', ''))
+  end;
+  -- parseTail = function(field, name, type, tail)
+  --   local size = assert(tonumber(tail:match('max (%d+) characters')))
+  --   if size == 2047 then
+  --     field.format = 'c4'
+  --     field.struct = vstruct.compile(field.format)
+  --     field.read = function(self, data)
+  --       -- The leading count in a counted string INCLUDES THE NULL TERMINATOR,
+  --       -- so strip it off here.
+  --       return (table.unpack(self.struct:read(data)):gsub('%z+$', ''))
+  --     end
+  --   else
+  --     field.format = 'z'..(size+1)
+  --     field.struct = vstruct.compile(field.format)
+  --   end
+  -- end;
+}
 
 mktype('ang', 'p2,15', function(self, value) return '%d°' % (value*180) end)
 mktype('rgb', '{ r:u1 g:u1 b:u1 }', function(self, value)
@@ -132,10 +166,10 @@ ptypes.unknown = {
 function ptypes._finalize()
   for k,v in pairs(ptypes) do
     if k:sub(1,1) == '_' then goto continue end
-    v.struct = v.struct or vstruct.compile(v.format)
+    v.struct = v.struct or (v.format and vstruct.compile(v.format))
     v.parseTail = v.parseTail or function() end
     v.read = v.read or function(self, data)
-      return table.unpack(v.struct:read(data))
+      return table.unpack(self.struct:read(data))
     end
     v.clone = function(self)
       -- Copy struct over by hand to preserve its metatable
