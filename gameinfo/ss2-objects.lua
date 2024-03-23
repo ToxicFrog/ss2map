@@ -158,12 +158,12 @@ defcategory 'Critters' {
   };
 }
 
-defcategory 'Functional' {
+defcategory 'Switches' {
   colour = '#00ff00';
   visible = true;
   info = 'Interactable objects like computers, buttons, and card readers.';
   types = {
-    'Object/Physical/Functional',
+    'Object/Physical/Functional/Controllers',
   };
 }
 
@@ -173,6 +173,15 @@ defcategory 'Doors' {
   info = 'They open. They shut.';
   types = {
     'Object/Physical/Terrain/Doors',
+  };
+}
+
+defcategory 'Functional' {
+  colour = '#ffa020';
+  visible = true;
+  info = 'Other interactable objects, like recharge stations and explosives.';
+  types = {
+    'Object/Physical/Functional',
   };
 }
 
