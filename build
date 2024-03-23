@@ -41,6 +41,18 @@ function build/ss2 {
 	mkmaps ss2 "$@"
 }
 
+function build/ss2_ponterbee {
+	mkmaps ss2_ponterbee --strings game/ss2_ponterbee/strings/english "$@"
+}
+
+function build/ss2_nightwalker {
+	mkmaps ss2_nightwalker --strings game/ss2_nightwalker/strings/english "$@"
+}
+
+function build/ss2_polaris {
+	mkmaps ss2_polaris --strings game/ss2_polaris/strings/english "$@"
+}
+
 function build/t1 {
   mkmaps t1 "$@"
 }
@@ -52,13 +64,16 @@ function build/t2 {
 function build/all {
   build/clean
   build/ss2
+  build/ss2_ponterbee
+  build/ss2_nightwalker
+  build/ss2_polaris
   build/t1
   build/t2
   build/zip
 }
 
 function build/deploy {
-	rsync -aPhv maps/ funkyhorror:www/toxicfrog/maps/
+	rsync -aPhv --delete-after maps/ funkyhorror:www/toxicfrog/maps/
 }
 
 function build/zip {
