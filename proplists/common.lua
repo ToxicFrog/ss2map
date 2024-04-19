@@ -161,6 +161,7 @@ ptypes.sESndTagList = {
 }
 
 ptypes.unknown = {
+  is_unknown = true;
   format = '';
   read = function(self, data) return data end;
   pprint = function(self, value)
