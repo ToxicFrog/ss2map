@@ -28,6 +28,19 @@ ptypes.sKeyInfo = {
   end
 }
 
+ptypes.sRepContents = {
+  format = '{ contents:{ 6*z64 } costs:{ 6*u4 } }';
+  pprint = function(self, value, propdef, db)
+    local buf = {}
+    for i,v in ipairs(value.contents) do
+      if #v > 0 then
+        table.insert(buf, string.format('%s (¢%d)', v, value.costs[i]))
+      end
+    end
+    return table.concat(buf, '; ')
+  end
+}
+
 ptypes.cPhysDimsProp = {
   -- TODO: all the rest of the fields
   format = '{ x32 x:f4 y:f4 z:f4 x8 }';
