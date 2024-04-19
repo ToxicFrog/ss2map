@@ -62,14 +62,7 @@ function build/t2 {
 }
 
 function build/all {
-  build/clean
-  build/ss2
-  build/ss2_ponterbee
-  build/ss2_nightwalker
-  build/ss2_polaris
-  build/t1
-  build/t2
-  build/zip
+  main ss2{,_ponterbee,_nightwalker,_polaris} t1 t2 zip -- "$@"
 }
 
 function build/deploy {
