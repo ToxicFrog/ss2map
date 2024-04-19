@@ -174,6 +174,12 @@ function showAllLayers(visible) {
   updateLayers();
 }
 
+// TODO: better control over search:
+// foo/bar to find objects with foo in the name and containing bar, e.g.
+// rep/maintenance tool to find all replicators that can vend maint tools
+// #id to search on ID exact match
+// %type for substring search on type only
+// @name ditto but on name only
 function performSearch(all) {
   var search = document.getElementById("search-text").value.toLowerCase()
   search_results = []
@@ -227,15 +233,23 @@ function nameMatches(obj, name) {
 
 function contentsMatch(objs, obj, name) {
   if (!obj._contents) return false
-  for (i in obj._contents) {
-    let item = objs[obj._contents[i]]
+  for (id of obj._contents) {
+    let item = objs[id]
     if (objectMatches(objs, item, name)) return true;
   }
+
   return false
 }
 
+function propsMatch(obj, props, name) {
+  for (key of props) {
+    if (obj[key] && obj[key].toLowerCase().search(name) != -1) return true;
+  }
+  return false;
+}
+
 function objectMatches(objs, obj, name) {
-  return nameMatches(obj, name) || contentsMatch(objs, obj, name)
+  return nameMatches(obj, name) || contentsMatch(objs, obj, name) || propsMatch(obj, ['RepContents', 'RepHacked'], name)
 }
 
 function appendSearchResult(level, obj) {
