@@ -228,6 +228,7 @@ function nameMatches(obj, name) {
   // TODO: look at the ObjName and ObjShort from the base obj as well
   return obj.name.toLowerCase().search(name) != -1
       || obj._type.toLowerCase().search(name) != -1
+      || propsMatch(obj, ["short desc", "full desc"], name);
       // || (obj.SymName && obj.ObjName.toLowerCase().search(name) != -1);
 }
 
