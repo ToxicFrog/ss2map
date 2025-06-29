@@ -78,7 +78,9 @@ function renderbrush.cylinder(mode, brush)
   local x,y = brush.position.x, brush.position.y
   local w,h = getRotatedWH(brush)
   local sides = brush.shape.index+3
-  return drawPolygon(mode, x, y, w, h, sides, brush.rotation.z*math.pi)
+  -- If face_aligned is set, there is a face rather than a vertex at 0° heading.
+  local rotation = brush.rotation.z + (brush.shape.face_aligned and 1/sides or 0)
+  return drawPolygon(mode, x, y, w, h, sides, rotation*math.pi)
 end
 
 function renderbrush.cone(mode, brush)
