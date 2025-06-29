@@ -41,6 +41,15 @@ ptypes.sRepContents = {
   end
 }
 
+ptypes.sGunState = {
+  format = '{ ammo:u4 condition:f4 silence:f4 mode:u4 mods:u4 }';
+  pprint = function(self, value, propdef, db)
+    return string.format(
+      '%d rounds, %d%% durability, mod level %d',
+      value.ammo, value.condition, value.mods)
+  end
+}
+
 ptypes.cPhysDimsProp = {
   -- TODO: all the rest of the fields
   format = '{ x32 x:f4 y:f4 z:f4 x8 }';
